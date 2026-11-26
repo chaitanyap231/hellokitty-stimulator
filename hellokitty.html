@@ -1,0 +1,2157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello Kitty Cozy Café & Room Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #FFF9F4;
+      --blush: #FFD6E8;
+      --cherry: #FF4D6D;
+      --butter: #FFE8A3;
+      --cocoa: #593636;
+      --cocoa-soft: #8A5E63;
+      --lace: #FFE4EE;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Nunito', sans-serif;
+      color: var(--cocoa);
+      background-color: var(--cream);
+      background-image:
+        radial-gradient(circle at 12% 10%, rgba(255, 214, 232, 0.7) 0%, transparent 40%),
+        radial-gradient(circle at 88% 15%, rgba(255, 232, 163, 0.55) 0%, transparent 40%),
+        radial-gradient(circle at 50% 95%, rgba(255, 214, 232, 0.65) 0%, transparent 50%),
+        radial-gradient(#ffcadf 1.2px, transparent 1.2px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 22px 22px;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .font-display {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    /* Lace-like kawaii card framing */
+    .lace-card {
+      background: rgba(255, 252, 249, 0.92);
+      border: 2.5px solid #FBC4D8;
+      box-shadow:
+        0 0 0 4px rgba(255, 255, 255, 0.85),
+        0 10px 26px rgba(89, 54, 54, 0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Glossy 3D pillow sticker button */
+    .kawaii-btn {
+      position: relative;
+      transition: transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.14s ease, filter 0.15s ease;
+      box-shadow:
+        inset 0 2px 3px rgba(255, 255, 255, 0.75),
+        0 4px 0 rgba(196, 86, 118, 0.3),
+        0 7px 14px rgba(89, 54, 54, 0.1);
+    }
+    .kawaii-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      filter: brightness(1.03);
+      box-shadow:
+        inset 0 2px 4px rgba(255, 255, 255, 0.85),
+        0 6px 0 rgba(196, 86, 118, 0.34),
+        0 10px 18px rgba(89, 54, 54, 0.13);
+    }
+    .kawaii-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow:
+        inset 0 2px 2px rgba(255, 255, 255, 0.6),
+        0 1px 0 rgba(196, 86, 118, 0.25),
+        0 3px 6px rgba(89, 54, 54, 0.08);
+    }
+    .kawaii-btn:disabled {
+      opacity: 0.52;
+      cursor: not-allowed;
+    }
+
+    /* Room Themes (4 Pinterest-style themes) */
+    .theme-strawberry {
+      --wall-bg:
+        linear-gradient(90deg, rgba(255, 194, 218, 0.32) 50%, transparent 50%),
+        linear-gradient(rgba(255, 194, 218, 0.32) 50%, transparent 50%),
+        #FFF3F7;
+      --wall-size: 34px 34px;
+      --wainscot: #FFF9F4;
+      --trim: #F6A8C2;
+      --floor-top: #F7D4C4;
+      --floor-bottom: #E7B8A4;
+      --awning-a: #FF5C82;
+      --awning-b: #FFF9F4;
+      --rug-bg: #FFE3EE;
+      --rug-border: #FF94B4;
+      --shelf: #F2B5A7;
+    }
+
+    .theme-matcha {
+      --wall-bg:
+        radial-gradient(rgba(167, 218, 185, 0.45) 2.5px, transparent 2.5px),
+        #F3FBF5;
+      --wall-size: 24px 24px;
+      --wainscot: #FFFDF7;
+      --trim: #95D5B2;
+      --floor-top: #EAD2B5;
+      --floor-bottom: #D7B691;
+      --awning-a: #74C69D;
+      --awning-b: #FFFDF7;
+      --rug-bg: #E2F6EA;
+      --rug-border: #8AC9A6;
+      --shelf: #D9AE87;
+    }
+
+    .theme-lavender {
+      --wall-bg:
+        linear-gradient(90deg, rgba(212, 192, 250, 0.3) 50%, transparent 50%),
+        linear-gradient(rgba(212, 192, 250, 0.3) 50%, transparent 50%),
+        #F7F3FF;
+      --wall-size: 32px 32px;
+      --wainscot: #FDFBFF;
+      --trim: #C4A7F2;
+      --floor-top: #E6D5EB;
+      --floor-bottom: #D0B8DA;
+      --awning-a: #A78BFA;
+      --awning-b: #FDFBFF;
+      --rug-bg: #EDE4FF;
+      --rug-border: #BCA4F5;
+      --shelf: #CBAFE6;
+    }
+
+    .theme-sakura {
+      --wall-bg:
+        radial-gradient(rgba(255, 179, 198, 0.4) 2.4px, transparent 2.4px),
+        linear-gradient(180deg, #FFF2F4 0%, #FFE6EC 100%);
+      --wall-size: 26px 26px, 100% 100%;
+      --wainscot: #FFF8F5;
+      --trim: #F497AE;
+      --floor-top: #F2D2BD;
+      --floor-bottom: #DFB39A;
+      --awning-a: #FF7B9C;
+      --awning-b: #FFF5F7;
+      --rug-bg: #FFE8EE;
+      --rug-border: #F59BB3;
+      --shelf: #E5B299;
+    }
+
+    .room-wall {
+      background: var(--wall-bg);
+      background-size: var(--wall-size);
+      transition: background 0.45s ease;
+    }
+    .room-wainscot {
+      background: var(--wainscot);
+      border-top: 3px solid var(--trim);
+      background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 34px,
+        rgba(89, 54, 54, 0.05) 34px,
+        rgba(89, 54, 54, 0.05) 36px
+      );
+      transition: all 0.45s ease;
+    }
+    .room-floor {
+      background: linear-gradient(180deg, var(--floor-top) 0%, var(--floor-bottom) 100%);
+      transition: background 0.45s ease;
+    }
+    .room-rug {
+      background: var(--rug-bg);
+      border: 3px dashed var(--rug-border);
+      transition: all 0.45s ease;
+    }
+
+    /* Scalloped café awning */
+    .awning-strip {
+      display: flex;
+      width: 100%;
+      height: 30px;
+      position: relative;
+      z-index: 25;
+      filter: drop-shadow(0 4px 4px rgba(89, 54, 54, 0.14));
+    }
+    .awning-scallop {
+      flex: 1;
+      height: 100%;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      border-bottom: 2px solid rgba(89, 54, 54, 0.15);
+      transition: background-color 0.4s ease;
+    }
+    .awning-scallop:nth-child(odd) {
+      background-color: var(--awning-a);
+    }
+    .awning-scallop:nth-child(even) {
+      background-color: var(--awning-b);
+    }
+
+    /* Window sky states */
+    .sky-morning {
+      background: linear-gradient(180deg, #AEE6FF 0%, #DEF6FF 65%, #FFF7DC 100%);
+    }
+    .sky-sunset {
+      background: linear-gradient(180deg, #FF9EBB 0%, #FFC8A2 55%, #FFEAA7 100%);
+    }
+    .sky-night {
+      background: linear-gradient(180deg, #1E214D 0%, #373676 65%, #5C4D8C 100%);
+    }
+
+    /* Animations */
+    @keyframes kittyBreathe {
+      0%, 100% { transform: translateY(0) scale(1, 1); }
+      50% { transform: translateY(-4px) scale(1.015, 0.988); }
+    }
+    @keyframes kittyHop {
+      0% { transform: translateY(0) scale(1, 1); }
+      30% { transform: translateY(-20px) scale(0.95, 1.07); }
+      55% { transform: translateY(0) scale(1.06, 0.93); }
+      78% { transform: translateY(-8px) scale(0.98, 1.03); }
+      100% { transform: translateY(0) scale(1, 1); }
+    }
+    @keyframes kittySleepSway {
+      0%, 100% { transform: rotate(-2.5deg) translateY(0); }
+      50% { transform: rotate(2.5deg) translateY(2px); }
+    }
+    @keyframes earWiggle {
+      0%, 100% { transform: rotate(0deg); }
+      30% { transform: rotate(-6deg); }
+      65% { transform: rotate(5deg); }
+    }
+    @keyframes cloudDrift {
+      0% { transform: translateX(-20px); }
+      100% { transform: translateX(120px); }
+    }
+    @keyframes bulbGlow {
+      0%, 100% { opacity: 0.72; transform: scale(0.94); }
+      50% { opacity: 1; transform: scale(1.14); }
+    }
+    @keyframes particleFloat {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.55) rotate(0deg); }
+      18% { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -92px) scale(1.25) rotate(var(--rot, 16deg)); }
+    }
+    @keyframes dropFall {
+      0% { opacity: 1; transform: translateY(-18px) scale(0.9); }
+      100% { opacity: 0; transform: translateY(22px) scale(0.7); }
+    }
+    @keyframes customerBob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    @keyframes zzzRise {
+      0% { opacity: 0; transform: translate(0, 0) scale(0.7); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: translate(16px, -44px) scale(1.2); }
+    }
+    @keyframes whiskSpin {
+      0% { transform: rotate(-18deg) translateX(-10px); }
+      50% { transform: rotate(18deg) translateX(10px); }
+      100% { transform: rotate(-18deg) translateX(-10px); }
+    }
+
+    .anim-breathe { animation: kittyBreathe 3.2s ease-in-out infinite; }
+    .anim-hop { animation: kittyHop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .anim-sleep { animation: kittySleepSway 3.4s ease-in-out infinite; }
+    .anim-ear-wiggle { transform-origin: 70px 60px; animation: earWiggle 0.45s ease-in-out; }
+    .anim-cloud { animation: cloudDrift 16s linear infinite; }
+    .anim-bulb { animation: bulbGlow 2.4s ease-in-out infinite; }
+    .anim-customer { animation: customerBob 2.6s ease-in-out infinite; }
+    .anim-zzz { animation: zzzRise 2.2s ease-out infinite; }
+    .anim-whisk { animation: whiskSpin 0.35s ease-in-out infinite; }
+
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      z-index: 45;
+      font-size: 1.3rem;
+      animation: particleFloat 1.15s ease-out forwards;
+      filter: drop-shadow(0 3px 5px rgba(89, 54, 54, 0.18));
+    }
+
+    .drop-target-glow {
+      box-shadow: 0 0 0 4px #FF4D6D, 0 0 22px rgba(255, 77, 109, 0.55) !important;
+      border-radius: 1.5rem;
+    }
+
+    /* Drag ghost */
+    #drag-ghost {
+      position: fixed;
+      pointer-events: none;
+      z-index: 100;
+      transform: translate(-50%, -50%) scale(1.25);
+      filter: drop-shadow(0 8px 12px rgba(89, 54, 54, 0.25));
+      transition: transform 0.08s ease;
+    }
+
+    /* Custom cute scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #FFF2F7; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb { background: #F7B2C8; border-radius: 999px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Floating Drag Ghost for Touch & Mouse Drag-and-Drop -->
+  <div id="drag-ghost" class="hidden text-4xl">🍰</div>
+
+  <!-- Top Header -->
+  <header class="w-full max-w-7xl mx-auto px-3 sm:px-5 pt-3 pb-2 flex flex-wrap items-center justify-between gap-2.5">
+    <div class="flex items-center gap-2.5">
+      <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#FF6B8B] to-[#FF3B66] flex items-center justify-center border-2 border-white shadow-md">
+        <svg class="w-7 h-7" viewBox="0 0 40 40" fill="none">
+          <path d="M18 20L6 10C4 8.5 2 10.5 3 13L5.5 20L3 27C2 29.5 4 31.5 6 30L18 20Z" fill="#FFF9F4" stroke="#593636" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M22 20L34 10C36 8.5 38 10.5 37 13L34.5 20L37 27C38 29.5 36 31.5 34 30L22 20Z" fill="#FFF9F4" stroke="#593636" stroke-width="2" stroke-linejoin="round"/>
+          <circle cx="20" cy="20" r="5" fill="#FFE8A3" stroke="#593636" stroke-width="2"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="font-display text-lg sm:text-2xl font-bold text-[#593636] leading-tight">
+          Hello Kitty Cozy Café
+        </h1>
+        <p class="text-[11px] sm:text-xs font-bold text-[#8A5E63]">
+          Rub Kitty for headpats • Drag treats to serve friends • Bake, dress up &amp; snap Polaroids!
+        </p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button id="polaroid-btn" type="button" class="kawaii-btn bg-gradient-to-b from-[#FFE8A3] to-[#FFD166] text-[#593636] border-2 border-white px-3 py-2 rounded-2xl font-display font-semibold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+        <span>📸</span> <span class="hidden sm:inline">Polaroid</span>
+      </button>
+      <button id="sound-btn" type="button" class="kawaii-btn bg-white text-[#593636] border-2 border-[#FBC4D8] px-3 py-2 rounded-2xl font-display font-semibold text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+        <span id="sound-icon">🔔</span> <span id="sound-label" class="hidden sm:inline">Sound On</span>
+      </button>
+      <button id="reset-btn" type="button" class="kawaii-btn bg-[#FFF2F6] text-[#8A5E63] border-2 border-[#FBC4D8] px-2.5 py-2 rounded-2xl font-display font-semibold text-xs cursor-pointer" title="Reset progress">
+        ↺
+      </button>
+    </div>
+  </header>
+
+  <!-- Pill HUD Bar -->
+  <section class="w-full max-w-7xl mx-auto px-3 sm:px-5 pb-2.5">
+    <div class="lace-card rounded-3xl px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-3">
+      <!-- Friendship Level + Coins -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center gap-2 bg-[#FFF2F7] border-2 border-[#FBC4D8] rounded-full px-3 py-1">
+          <span class="text-base">🎀</span>
+          <div class="leading-tight">
+            <div class="font-display font-bold text-xs text-[#593636]">
+              Lv.<span id="hud-level">1</span> Bestie
+            </div>
+            <div class="w-16 h-1.5 bg-pink-100 rounded-full overflow-hidden mt-0.5">
+              <div id="hud-xp-bar" class="h-full bg-gradient-to-r from-[#FF6B8B] to-[#FF4D6D] rounded-full transition-all duration-500" style="width: 20%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-[#FFF9E6] border-2 border-[#FFE082] rounded-full px-3.5 py-1.5 shadow-sm">
+          <span class="text-base">🪙</span>
+          <span id="hud-coins" class="font-display font-bold text-sm sm:text-base text-[#593636]">45</span>
+          <span class="text-[11px] font-extrabold text-[#9E7535]">Coins</span>
+        </div>
+      </div>
+
+      <!-- 3 Care Meters -->
+      <div class="flex-1 min-w-[230px] grid grid-cols-3 gap-2.5 sm:gap-4 max-w-xl">
+        <div>
+          <div class="flex justify-between text-[11px] font-extrabold text-[#D63E68] mb-0.5">
+            <span>💖 Happy</span><span id="hud-happy-val">85%</span>
+          </div>
+          <div class="h-2.5 bg-pink-100 rounded-full overflow-hidden border border-pink-200">
+            <div id="hud-happy-bar" class="h-full bg-gradient-to-r from-[#FF8FAB] to-[#FF4D6D] rounded-full transition-all duration-400" style="width: 85%;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-[11px] font-extrabold text-[#D97706] mb-0.5">
+            <span>🍓 Tummy</span><span id="hud-tummy-val">75%</span>
+          </div>
+          <div class="h-2.5 bg-amber-100 rounded-full overflow-hidden border border-amber-200">
+            <div id="hud-tummy-bar" class="h-full bg-gradient-to-r from-[#FCD34D] to-[#FB7185] rounded-full transition-all duration-400" style="width: 75%;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="flex justify-between text-[11px] font-extrabold text-[#7C3AED] mb-0.5">
+            <span>🌙 Energy</span><span id="hud-energy-val">80%</span>
+          </div>
+          <div class="h-2.5 bg-purple-100 rounded-full overflow-hidden border border-purple-200">
+            <div id="hud-energy-bar" class="h-full bg-gradient-to-r from-[#C4B5FD] to-[#A78BFA] rounded-full transition-all duration-400" style="width: 80%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Workspace -->
+  <main class="w-full max-w-7xl mx-auto px-3 sm:px-5 pb-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+    <!-- Left Column: Interactive Room Stage + Draggable Bakery Display -->
+    <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-3.5">
+      <!-- Interactive Café & Room Stage -->
+      <div
+        id="room-stage"
+        class="theme-strawberry relative w-full h-[430px] sm:h-[490px] rounded-[2rem] border-4 border-white shadow-[0_14px_34px_rgba(89,54,54,0.14)] overflow-hidden flex flex-col justify-between"
+      >
+        <!-- Dynamic Lighting Overlay (Morning / Sunset / Night / Nap) -->
+        <div id="lighting-overlay" class="absolute inset-0 pointer-events-none z-30 transition-all duration-700 bg-transparent"></div>
+
+        <!-- Floating Particles Layer -->
+        <div id="particles-layer" class="absolute inset-0 pointer-events-none z-40 overflow-hidden"></div>
+
+        <!-- Scalloped Café Awning -->
+        <div class="awning-strip">
+          <div class="awning-scallop"></div><div class="awning-scallop"></div><div class="awning-scallop"></div>
+          <div class="awning-scallop"></div><div class="awning-scallop"></div><div class="awning-scallop"></div>
+          <div class="awning-scallop"></div><div class="awning-scallop"></div><div class="awning-scallop"></div>
+          <div class="awning-scallop"></div><div class="awning-scallop"></div><div class="awning-scallop"></div>
+        </div>
+
+        <!-- Glowing Fairy Lights String -->
+        <svg id="fairy-lights-svg" class="absolute top-6 left-0 w-full h-14 z-20 pointer-events-none transition-opacity duration-500" viewBox="0 0 700 60" preserveAspectRatio="none">
+          <path d="M0,4 Q175,38 350,12 Q525,38 700,4" fill="none" stroke="#8A5E63" stroke-width="2" opacity="0.65"/>
+          <g id="fairy-bulbs">
+            <circle class="anim-bulb" cx="65" cy="18" r="5" fill="#FFF3B0" style="animation-delay:0s"/>
+            <circle class="anim-bulb" cx="145" cy="25" r="5" fill="#FFD6E8" style="animation-delay:0.4s"/>
+            <circle class="anim-bulb" cx="225" cy="24" r="5" fill="#FFF3B0" style="animation-delay:0.8s"/>
+            <circle class="anim-bulb" cx="305" cy="16" r="5" fill="#FFE8A3" style="animation-delay:1.2s"/>
+            <circle class="anim-bulb" cx="395" cy="16" r="5" fill="#FFD6E8" style="animation-delay:0.3s"/>
+            <circle class="anim-bulb" cx="475" cy="24" r="5" fill="#FFF3B0" style="animation-delay:0.9s"/>
+            <circle class="anim-bulb" cx="555" cy="25" r="5" fill="#FFE8A3" style="animation-delay:1.4s"/>
+            <circle class="anim-bulb" cx="635" cy="18" r="5" fill="#FFD6E8" style="animation-delay:0.6s"/>
+          </g>
+        </svg>
+
+        <!-- Kitty Speech / Toast Pill inside top center -->
+        <div class="absolute top-12 left-1/2 -translate-x-1/2 z-30 max-w-[82%] sm:max-w-md pointer-events-none">
+          <div class="bg-white/95 border-2 border-[#FBC4D8] px-3.5 py-1.5 rounded-full shadow-md text-center font-bold text-[11px] sm:text-xs text-[#593636] truncate">
+            <span id="stage-toast">Welcome! Rub Kitty's head or drag treats to our café friend!</span>
+          </div>
+        </div>
+
+        <!-- Upper Wall Layer -->
+        <div class="room-wall relative flex-1 w-full">
+          <!-- Arched Clickable Window (Left) -->
+          <div class="absolute left-3 sm:left-7 top-10 sm:top-12 z-20 flex flex-col items-center">
+            <button
+              id="window-btn"
+              type="button"
+              title="Click to cycle Morning / Sunset / Starry Night"
+              class="group relative w-24 h-28 sm:w-32 sm:h-36 rounded-t-full border-4 border-white shadow-inner overflow-hidden cursor-pointer sky-morning transition-all duration-700"
+            >
+              <!-- Sky Celestial Body -->
+              <div id="sky-sun-moon" class="absolute top-3.5 right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#FFE8A3] shadow-[0_0_14px_rgba(255,232,163,0.95)] transition-all duration-500"></div>
+              <!-- Stars (night only) -->
+              <div id="sky-stars" class="hidden absolute inset-0 pointer-events-none text-yellow-100 text-[10px]">
+                <span class="absolute top-4 left-4 animate-pulse">✦</span>
+                <span class="absolute top-10 left-10 animate-pulse" style="animation-delay:0.5s">✧</span>
+                <span class="absolute top-14 right-5 animate-pulse" style="animation-delay:1s">✦</span>
+                <span class="absolute top-7 left-1/2 animate-pulse" style="animation-delay:0.8s">✦</span>
+              </div>
+              <!-- Drifting Clouds -->
+              <div id="sky-clouds" class="absolute inset-0 pointer-events-none">
+                <div class="anim-cloud absolute top-9 -left-6 w-12 h-4 bg-white/85 rounded-full"></div>
+                <div class="anim-cloud absolute top-16 -left-10 w-10 h-3.5 bg-white/75 rounded-full" style="animation-delay:-7s"></div>
+              </div>
+              <!-- Window Mullions -->
+              <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1.5 bg-white/90"></div>
+              <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-1.5 bg-white/90"></div>
+            </button>
+
+            <!-- Windowsill & Interactive Strawberry Plant -->
+            <div class="relative -mt-1 flex flex-col items-center">
+              <div class="w-28 sm:w-36 h-3.5 bg-white rounded-full border border-[#FBC4D8] shadow-sm"></div>
+              <button
+                id="plant-btn"
+                type="button"
+                title="Click to water or harvest strawberries!"
+                class="relative -mt-12 sm:-mt-14 flex flex-col items-center cursor-pointer group focus:outline-none"
+              >
+                <div id="plant-droplets" class="hidden absolute -top-3 flex gap-1 text-xs pointer-events-none">
+                  <span style="animation: dropFall 0.6s ease-in forwards">💧</span>
+                  <span style="animation: dropFall 0.6s ease-in 0.12s forwards">💧</span>
+                </div>
+                <svg id="strawberry-plant-svg" class="w-16 h-16 sm:w-20 sm:h-20 overflow-visible transition-transform group-hover:scale-105" viewBox="0 0 80 80">
+                  <!-- Pot -->
+                  <path d="M23 54 L57 54 L52 74 L28 74 Z" fill="#F4A261" stroke="#593636" stroke-width="2" stroke-linejoin="round"/>
+                  <rect x="20" y="49" width="40" height="7" rx="3.5" fill="#F6B985" stroke="#593636" stroke-width="2"/>
+                  <circle cx="40" cy="64" r="3.5" fill="#FFF9F4"/>
+                  <!-- Stage 0: Sprout -->
+                  <g id="plant-stage-0">
+                    <path d="M40 49 Q39 38 33 34" stroke="#52B788" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M40 49 Q42 38 48 34" stroke="#52B788" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="31" cy="34" rx="6" ry="3.5" transform="rotate(-20 31 34)" fill="#74C69D" stroke="#593636" stroke-width="1.5"/>
+                    <ellipse cx="49" cy="34" rx="6" ry="3.5" transform="rotate(20 49 34)" fill="#74C69D" stroke="#593636" stroke-width="1.5"/>
+                  </g>
+                  <!-- Stage 1: Blooms -->
+                  <g id="plant-stage-1" class="hidden">
+                    <path d="M40 49 Q34 32 25 28 M40 49 Q40 28 40 20 M40 49 Q48 32 56 28" stroke="#40916C" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="26" cy="40" rx="8" ry="4.5" transform="rotate(-22 26 40)" fill="#74C69D" stroke="#593636" stroke-width="1.5"/>
+                    <ellipse cx="54" cy="40" rx="8" ry="4.5" transform="rotate(22 54 40)" fill="#74C69D" stroke="#593636" stroke-width="1.5"/>
+                    <circle cx="40" cy="18" r="6" fill="#FFFFFF" stroke="#593636" stroke-width="1.5"/>
+                    <circle cx="40" cy="18" r="2.6" fill="#FFE8A3"/>
+                    <circle cx="25" cy="27" r="5" fill="#FFD6E8" stroke="#593636" stroke-width="1.5"/>
+                    <circle cx="25" cy="27" r="2" fill="#FFE8A3"/>
+                    <circle cx="55" cy="27" r="5" fill="#FFD6E8" stroke="#593636" stroke-width="1.5"/>
+                    <circle cx="55" cy="27" r="2" fill="#FFE8A3"/>
+                  </g>
+                  <!-- Stage 2: Ripe Strawberries -->
+                  <g id="plant-stage-2" class="hidden">
+                    <path d="M40 49 Q32 30 23 29 M40 49 Q40 26 40 19 M40 49 Q48 30 57 29" stroke="#40916C" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <ellipse cx="24" cy="40" rx="9" ry="5" transform="rotate(-24 24 40)" fill="#52B788" stroke="#593636" stroke-width="1.5"/>
+                    <ellipse cx="56" cy="40" rx="9" ry="5" transform="rotate(24 56 40)" fill="#52B788" stroke="#593636" stroke-width="1.5"/>
+                    <!-- Berry 1 -->
+                    <path d="M34 19 C34 15 46 15 46 19 C46 26 40 31 40 31 C40 31 34 26 34 19 Z" fill="#FF4D6D" stroke="#593636" stroke-width="1.6"/>
+                    <circle cx="38" cy="21" r="0.9" fill="#FFE8A3"/><circle cx="42" cy="22" r="0.9" fill="#FFE8A3"/><circle cx="40" cy="26" r="0.9" fill="#FFE8A3"/>
+                    <!-- Berry 2 -->
+                    <path d="M18 28 C18 24 28 24 28 28 C28 34 23 38 23 38 C23 38 18 34 18 28 Z" fill="#FF4D6D" stroke="#593636" stroke-width="1.6"/>
+                    <!-- Berry 3 -->
+                    <path d="M52 28 C52 24 62 24 62 28 C62 34 57 38 57 38 C57 38 52 34 52 28 Z" fill="#FF4D6D" stroke="#593636" stroke-width="1.6"/>
+                  </g>
+                </svg>
+                <span id="plant-badge" class="mt-0.5 px-2 py-0.5 rounded-full bg-white/95 border border-[#FBC4D8] text-[10px] font-extrabold text-[#593636] shadow-sm">
+                  💧 Water Sprout
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Wall Shelf with Clickable Kawaii Music Box (Right) -->
+          <div class="absolute right-3 sm:right-7 top-16 sm:top-20 z-20 flex flex-col items-center">
+            <div class="flex items-end gap-2 px-2">
+              <!-- Mini Teapot Decor -->
+              <span class="text-xl sm:text-2xl drop-shadow-sm">🫖</span>
+              <!-- Clickable Music Box -->
+              <button
+                id="musicbox-btn"
+                type="button"
+                title="Click to toggle Cozy Music-Box Lullaby"
+                class="relative group cursor-pointer focus:outline-none transition-transform hover:scale-105"
+              >
+                <svg class="w-12 h-11 sm:w-14 sm:h-12" viewBox="0 0 60 54">
+                  <rect x="6" y="18" width="44" height="30" rx="7" fill="#FFD6E8" stroke="#593636" stroke-width="2.2"/>
+                  <path d="M8 18 Q28 4 48 18 Z" fill="#FF8FAB" stroke="#593636" stroke-width="2.2"/>
+                  <!-- Crank key -->
+                  <line x1="50" y1="33" x2="57" y2="33" stroke="#593636" stroke-width="2.2" stroke-linecap="round"/>
+                  <circle cx="57" cy="33" r="3" fill="#FFE8A3" stroke="#593636" stroke-width="1.8"/>
+                  <!-- Center heart -->
+                  <path d="M28 39 C28 39 20 34 20 29.5 C20 27 22 25.5 24 25.5 C25.7 25.5 27.2 26.6 28 28 C28.8 26.6 30.3 25.5 32 25.5 C34 25.5 36 27 36 29.5 C36 34 28 39 28 39 Z" fill="#FF4D6D"/>
+                </svg>
+                <span id="musicbox-status" class="block -mt-1 px-1.5 py-0.5 rounded-full bg-white/95 border border-[#FBC4D8] text-[9px] font-extrabold text-[#593636] shadow-sm">
+                  🎵 Music Off
+                </span>
+              </button>
+            </div>
+            <!-- Wooden Shelf -->
+            <div class="w-28 sm:w-32 h-3 rounded-full border-2 border-[#593636]/30 shadow-sm -mt-0.5" style="background: var(--shelf);"></div>
+          </div>
+        </div>
+
+        <!-- Wainscoting -->
+        <div class="room-wainscot h-10 w-full shrink-0"></div>
+
+        <!-- Floor + Visiting Customer + Hello Kitty -->
+        <div class="room-floor relative h-44 sm:h-48 w-full flex items-end justify-center px-3">
+          <!-- Cozy Rug -->
+          <div class="room-rug w-[86%] max-w-lg h-16 rounded-full mb-3 shadow-inner"></div>
+
+          <!-- Visiting Animal Friend (Left-Center) — Drop Target for Treats! -->
+          <div
+            id="customer-dropzone"
+            class="absolute left-3 sm:left-10 bottom-10 sm:bottom-12 z-25 flex flex-col items-center transition-all duration-200 p-1.5"
+          >
+            <!-- Customer Order Speech Bubble -->
+            <button
+              id="customer-order-btn"
+              type="button"
+              title="Click to serve if treat is selected, or drag a treat here!"
+              class="relative mb-1.5 bg-white border-2 border-[#593636] rounded-2xl px-2.5 py-1.5 shadow-md flex items-center gap-1.5 hover:scale-105 transition cursor-pointer"
+            >
+              <span id="order-treat-emoji" class="text-xl sm:text-2xl leading-none">🍰</span>
+              <div class="text-left leading-tight">
+                <div id="order-customer-name" class="font-display font-bold text-[10px] sm:text-xs text-[#593636]">Mochi Bunny</div>
+                <div id="order-treat-name" class="text-[9px] sm:text-[10px] font-extrabold text-[#FF4D6D]">Shortcake!</div>
+              </div>
+              <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r-2 border-b-2 border-[#593636] rotate-45"></span>
+            </button>
+
+            <!-- Custom SVG Animal Friend -->
+            <div id="customer-avatar" class="anim-customer cursor-pointer" title="Drag their favorite treat here or click to serve!">
+              <!-- Injected dynamically for Bunny, Bear, Puppy, Frog -->
+            </div>
+          </div>
+
+          <!-- Iconic Animated Hello Kitty (Center-Right) — Pet/Rub & Feed Drop Target! -->
+          <div
+            id="kitty-dropzone"
+            class="absolute right-4 sm:right-14 bottom-8 sm:bottom-10 z-25 flex flex-col items-center p-1.5 transition-all duration-200"
+          >
+            <!-- Floating Zzz bubbles (visible during Nap) -->
+            <div id="kitty-zzz" class="hidden absolute -top-6 right-2 pointer-events-none font-display font-bold text-[#7C3AED]">
+              <span class="anim-zzz inline-block text-sm">Z</span>
+              <span class="anim-zzz inline-block text-base" style="animation-delay:0.6s">z</span>
+              <span class="anim-zzz inline-block text-xs" style="animation-delay:1.2s">z</span>
+            </div>
+
+            <!-- Interactive Kitty Wrapper (Click OR Rub/Drag over head!) -->
+            <div
+              id="kitty-actor"
+              class="anim-breathe relative cursor-pointer touch-none"
+              role="button"
+              tabindex="0"
+              aria-label="Pet or rub Hello Kitty"
+            >
+              <svg id="kitty-svg" class="w-36 h-40 sm:w-44 sm:h-48 overflow-visible drop-shadow-[0_10px_14px_rgba(89,54,54,0.18)]" viewBox="0 0 160 176">
+                <!-- Soft Ground Shadow -->
+                <ellipse cx="80" cy="166" rx="44" ry="8" fill="rgba(89, 54, 54, 0.14)"/>
+
+                <!-- Feet -->
+                <ellipse cx="62" cy="159" rx="13" ry="7.5" fill="#FFFFFF" stroke="#593636" stroke-width="2.6"/>
+                <ellipse cx="98" cy="159" rx="13" ry="7.5" fill="#FFFFFF" stroke="#593636" stroke-width="2.6"/>
+
+                <!-- Left & Right Arms -->
+                <ellipse cx="42" cy="128" rx="10" ry="15" transform="rotate(24 42 128)" fill="#FFFFFF" stroke="#593636" stroke-width="2.6"/>
+                <ellipse cx="118" cy="128" rx="10" ry="15" transform="rotate(-24 118 128)" fill="#FFFFFF" stroke="#593636" stroke-width="2.6"/>
+
+                <!-- Dynamic Outfit Layer -->
+                <g id="kitty-outfit-layer"></g>
+
+                <!-- Head Group (for subtle ear wiggle) -->
+                <g id="kitty-head-group">
+                  <!-- Left Ear -->
+                  <path d="M36 62 L29 22 C28.5 18 33 16 36.5 18.5 L66 39 Z" fill="#FFFFFF" stroke="#593636" stroke-width="2.8" stroke-linejoin="round"/>
+                  <path d="M40 55 L35 29 L56 43 Z" fill="#FFD6E8"/>
+
+                  <!-- Right Ear -->
+                  <path d="M124 62 L131 22 C131.5 18 127 16 123.5 18.5 L94 39 Z" fill="#FFFFFF" stroke="#593636" stroke-width="2.8" stroke-linejoin="round"/>
+                  <path d="M120 55 L125 29 L104 43 Z" fill="#FFD6E8"/>
+
+                  <!-- Iconic Wide White Oval Head -->
+                  <ellipse cx="80" cy="76" rx="52" ry="41" fill="#FFFFFF" stroke="#593636" stroke-width="2.8"/>
+                  <!-- Soft top forehead highlight -->
+                  <ellipse cx="66" cy="49" rx="18" ry="6" fill="#FFFFFF" opacity="0.8"/>
+
+                  <!-- Rosy Blush Cheeks -->
+                  <ellipse id="kitty-blush-l" cx="46" cy="86" rx="9" ry="5.5" fill="#FF9EBB" opacity="0.68"/>
+                  <ellipse id="kitty-blush-r" cx="114" cy="86" rx="9" ry="5.5" fill="#FF9EBB" opacity="0.68"/>
+
+                  <!-- Eyes: Normal -->
+                  <g id="eyes-normal">
+                    <ellipse cx="55" cy="78" rx="4.8" ry="6.2" fill="#593636"/>
+                    <circle cx="53.4" cy="75.6" r="1.7" fill="#FFFFFF"/>
+                    <ellipse cx="105" cy="78" rx="4.8" ry="6.2" fill="#593636"/>
+                    <circle cx="103.4" cy="75.6" r="1.7" fill="#FFFFFF"/>
+                  </g>
+                  <!-- Eyes: Happy Curved -->
+                  <g id="eyes-happy" class="hidden">
+                    <path d="M48 79 Q55 70 62 79" stroke="#593636" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+                    <path d="M98 79 Q105 70 112 79" stroke="#593636" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+                  </g>
+                  <!-- Eyes: Blink / Sleep -->
+                  <g id="eyes-sleep" class="hidden">
+                    <path d="M49 78 Q55 83 61 78" stroke="#593636" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+                    <path d="M99 78 Q105 83 111 78" stroke="#593636" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+                  </g>
+
+                  <!-- Golden-Yellow Oval Nose -->
+                  <ellipse cx="80" cy="84" rx="5.8" ry="4" fill="#FFD166" stroke="#593636" stroke-width="2"/>
+                  <ellipse cx="78.5" cy="82.7" rx="1.8" ry="1" fill="#FFF9E6"/>
+
+                  <!-- Cute Eating Mouth (hidden normally, classic iconic clean face!) -->
+                  <ellipse id="kitty-eat-mouth" class="hidden" cx="80" cy="93" rx="4.5" ry="3.8" fill="#FF8FAB" stroke="#593636" stroke-width="2"/>
+
+                  <!-- 3 Delicate Whiskers Per Side -->
+                  <line x1="16" y1="71" x2="34" y2="74" stroke="#593636" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="14" y1="81" x2="32" y2="81" stroke="#593636" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="18" y1="92" x2="35" y2="88" stroke="#593636" stroke-width="2.5" stroke-linecap="round"/>
+
+                  <line x1="144" y1="71" x2="126" y2="74" stroke="#593636" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="146" y1="81" x2="128" y2="81" stroke="#593636" stroke-width="2.5" stroke-linecap="round"/>
+                  <line x1="142" y1="92" x2="125" y2="88" stroke="#593636" stroke-width="2.5" stroke-linecap="round"/>
+
+                  <!-- Dynamic Bow Layer (Oversized Glossy Multi-layered Bow on Right Ear) -->
+                  <g id="kitty-bow-layer"></g>
+
+                  <!-- Dynamic Accessory Layer -->
+                  <g id="kitty-accessory-layer"></g>
+                </g>
+              </svg>
+            </div>
+            <span class="px-2.5 py-0.5 -mt-1 rounded-full bg-white/95 border border-[#FBC4D8] text-[10px] font-extrabold text-[#D63E68] shadow-sm">
+              💕 Rub or Tap to Pet!
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scalloped Bakery Display Counter & Quick Care Bar -->
+      <div class="lace-card rounded-3xl p-3.5 sm:p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <div>
+            <h2 class="font-display font-bold text-sm sm:text-base text-[#593636] flex items-center gap-1.5">
+              <span>🧁</span> Bakery Counter <span class="text-xs font-bold text-[#8A5E63]">(Drag to Friend or Kitty, or tap!)</span>
+            </h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="open-bake-btn" type="button" class="kawaii-btn bg-gradient-to-b from-[#FF7B9C] to-[#FF4D6D] text-white px-3 py-1.5 rounded-xl font-display font-semibold text-xs flex items-center gap-1 cursor-pointer">
+              <span>🥣</span> Bake Fresh!
+            </button>
+            <button id="nap-btn" type="button" class="kawaii-btn bg-gradient-to-b from-[#C4B5FD] to-[#9F7AEA] text-white px-3 py-1.5 rounded-xl font-display font-semibold text-xs flex items-center gap-1 cursor-pointer">
+              <span>🌙</span> <span id="nap-btn-label">Cozy Nap</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Draggable/Clickable Treats -->
+        <div id="bakery-counter-grid" class="grid grid-cols-5 gap-2">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Selected treat helper bar for effortless click-serving on mobile -->
+        <div id="selected-treat-bar" class="hidden mt-2.5 bg-[#FFF2F7] border border-[#FBC4D8] rounded-2xl px-3 py-2 flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
+          <span>Selected: <strong id="selected-treat-label" class="text-[#FF4D6D]">Strawberry Shortcake</strong></span>
+          <div class="flex gap-2">
+            <button id="quick-serve-friend-btn" type="button" class="kawaii-btn bg-[#FFE8A3] text-[#593636] px-2.5 py-1 rounded-xl font-display text-xs cursor-pointer">
+              Serve Friend 🐾
+            </button>
+            <button id="quick-feed-kitty-btn" type="button" class="kawaii-btn bg-[#FFD6E8] text-[#593636] px-2.5 py-1 rounded-xl font-display text-xs cursor-pointer">
+              Feed Kitty 🎀
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Tabbed Boutique, Room Decor & Café Panel -->
+    <aside class="lg:col-span-5 xl:col-span-4 lace-card rounded-3xl p-4 flex flex-col gap-3.5">
+      <!-- Cute Pill Tabs -->
+      <div class="grid grid-cols-3 gap-1.5 bg-[#FFF0F5] p-1.5 rounded-2xl border border-[#FBC4D8]">
+        <button data-tab="boutique" class="tab-btn font-display font-semibold text-xs sm:text-sm py-2 rounded-xl transition cursor-pointer bg-white text-[#FF4D6D] shadow-sm">
+          👗 Boutique
+        </button>
+        <button data-tab="room" class="tab-btn font-display font-semibold text-xs sm:text-sm py-2 rounded-xl transition cursor-pointer text-[#8A5E63] hover:text-[#593636]">
+          🏠 Room
+        </button>
+        <button data-tab="cafe" class="tab-btn font-display font-semibold text-xs sm:text-sm py-2 rounded-xl transition cursor-pointer text-[#8A5E63] hover:text-[#593636]">
+          🍰 Café
+        </button>
+      </div>
+
+      <!-- TAB 1: Dress-Up Boutique -->
+      <div id="tab-boutique" class="tab-panel space-y-4 max-h-[500px] overflow-y-auto pr-1">
+        <div>
+          <h3 class="font-display font-bold text-xs uppercase tracking-wider text-[#8A5E63] mb-2">🎀 Signature Bows</h3>
+          <div id="boutique-bows" class="grid grid-cols-2 gap-2"></div>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-xs uppercase tracking-wider text-[#8A5E63] mb-2">👗 Cute Outfits</h3>
+          <div id="boutique-outfits" class="grid grid-cols-2 gap-2"></div>
+        </div>
+        <div>
+          <h3 class="font-display font-bold text-xs uppercase tracking-wider text-[#8A5E63] mb-2">✨ Accessories</h3>
+          <div id="boutique-accessories" class="grid grid-cols-2 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Room Themes & Atmosphere -->
+      <div id="tab-room" class="tab-panel hidden space-y-4 max-h-[500px] overflow-y-auto pr-1">
+        <div>
+          <h3 class="font-display font-bold text-xs uppercase tracking-wider text-[#8A5E63] mb-2">🌸 Pinterest Room Themes</h3>
+          <div id="room-themes-grid" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+        <div>
+          <h3 class="font-display font-bold text-xs uppercase tracking-wider text-[#8A5E63] mb-2">🌤️ Window Sky &amp; Lighting</h3>
+          <div class="grid grid-cols-3 gap-2">
+            <button data-sky="morning" class="sky-pill kawaii-btn bg-[#E0F7FF] text-[#593636] border-2 border-white py-2 rounded-2xl font-display text-xs font-semibold cursor-pointer">
+              ☀️ Morning
+            </button>
+            <button data-sky="sunset" class="sky-pill kawaii-btn bg-[#FFE0EC] text-[#593636] border-2 border-white py-2 rounded-2xl font-display text-xs font-semibold cursor-pointer">
+              🌇 Sunset
+            </button>
+            <button data-sky="night" class="sky-pill kawaii-btn bg-[#E5E0FF] text-[#593636] border-2 border-white py-2 rounded-2xl font-display text-xs font-semibold cursor-pointer">
+              🌙 Night
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-[#FFF5F8] border border-[#FBC4D8] rounded-2xl p-3 space-y-2 text-xs font-bold text-[#6E474C]">
+          <div class="font-display text-sm text-[#593636]">✨ Interactive Room Secrets</div>
+          <p>• Click the <strong>Arched Window</strong> to shift the sky &amp; room glow.</p>
+          <p>• Water the <strong>Strawberry Plant</strong> until ripe berries grow, then harvest for +15 Coins!</p>
+          <p>• Tap the <strong>Kawaii Music Box</strong> on the shelf for a cozy synthesized lullaby.</p>
+        </div>
+      </div>
+
+      <!-- TAB 3: Café Info & Baking -->
+      <div id="tab-cafe" class="tab-panel hidden space-y-3.5 max-h-[500px] overflow-y-auto pr-1">
+        <div class="bg-gradient-to-br from-[#FFF2F7] to-[#FFF9E6] border-2 border-[#FBC4D8] rounded-2xl p-3.5">
+          <div class="flex items-center justify-between">
+            <div class="font-display font-bold text-sm text-[#593636]">🐾 Current Café Guest</div>
+            <span class="px-2 py-0.5 rounded-full bg-white text-[11px] font-extrabold text-[#FF4D6D] border border-[#FBC4D8]">+18 🪙</span>
+          </div>
+          <p id="cafe-guest-desc" class="text-xs font-bold text-[#7A5156] mt-1">
+            Mochi Bunny is craving a fresh Strawberry Shortcake! Drag it from the Bakery Counter onto them.
+          </p>
+        </div>
+
+        <button id="tab-open-bake-btn" type="button" class="w-full kawaii-btn bg-gradient-to-b from-[#FF7B9C] to-[#FF4D6D] text-white py-3 rounded-2xl font-display font-bold text-sm flex items-center justify-center gap-2 cursor-pointer">
+          <span>🥣</span> Open "Bake a Treat" Mini-Game
+        </button>
+
+        <div class="bg-[#FFF9F4] border border-[#FBC4D8] rounded-2xl p-3">
+          <div class="font-display font-bold text-xs uppercase tracking-wider text-[#8A5E63] mb-2">📊 Cozy Café Stats</div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+            <div class="bg-white rounded-xl p-2 border border-pink-100">Orders Served: <span id="stat-orders" class="text-[#FF4D6D]">0</span></div>
+            <div class="bg-white rounded-xl p-2 border border-pink-100">Treats Baked: <span id="stat-baked" class="text-[#D97706]">0</span></div>
+            <div class="bg-white rounded-xl p-2 border border-pink-100">Headpats Given: <span id="stat-pats" class="text-[#EC4899]">0</span></div>
+            <div class="bg-white rounded-xl p-2 border border-pink-100">Berries Picked: <span id="stat-berries" class="text-[#10B981]">0</span></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 1: INTERACTIVE "BAKE A TREAT" 3-STEP MINI-GAME      -->
+  <!-- ========================================================= -->
+  <div id="bake-modal" class="hidden fixed inset-0 z-50 bg-[#593636]/45 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="lace-card w-full max-w-md rounded-[2rem] p-5 relative">
+      <button id="close-bake-btn" type="button" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#FFF0F5] border border-[#FBC4D8] font-bold text-[#593636] cursor-pointer">✕</button>
+      <h2 class="font-display text-xl font-bold text-[#593636] flex items-center gap-2">
+        <span>👩‍🍳</span> Bake a Kawaii Treat!
+      </h2>
+      <p class="text-xs font-bold text-[#8A5E63] mt-0.5">Complete 3 cute steps to restock your bakery &amp; earn +15 Coins!</p>
+
+      <!-- Treat Selector (Step 0) -->
+      <div id="bake-choose-view" class="mt-4">
+        <div class="text-xs font-extrabold text-[#8A5E63] mb-2">Choose which treat to bake (+3 stock):</div>
+        <div id="bake-treat-choices" class="grid grid-cols-2 gap-2"></div>
+      </div>
+
+      <!-- Active 3-Step Mini-Game View -->
+      <div id="bake-play-view" class="hidden mt-4 text-center">
+        <!-- Step Pills -->
+        <div class="flex items-center justify-center gap-2 text-[11px] font-extrabold mb-3">
+          <span id="step-pill-1" class="px-2.5 py-1 rounded-full bg-[#FF4D6D] text-white">1. Mix</span>
+          <span id="step-pill-2" class="px-2.5 py-1 rounded-full bg-pink-100 text-[#8A5E63]">2. Frost</span>
+          <span id="step-pill-3" class="px-2.5 py-1 rounded-full bg-pink-100 text-[#8A5E63]">3. Decorate</span>
+        </div>
+
+        <!-- Interactive Visual Bowl / Treat Stage -->
+        <div class="relative mx-auto w-48 h-44 bg-[#FFF3F7] border-2 border-dashed border-[#FBC4D8] rounded-3xl flex flex-col items-center justify-center overflow-hidden">
+          <div id="bake-visual" class="text-6xl transition-transform duration-150 select-none">🥣</div>
+          <div id="bake-sparkle-layer" class="absolute inset-0 pointer-events-none flex items-center justify-center text-2xl"></div>
+          <div id="bake-step-instruction" class="mt-2 font-display font-bold text-xs text-[#593636]">Tap to Mix Batter!</div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full h-3.5 bg-pink-100 rounded-full overflow-hidden border border-pink-200 mt-3.5">
+          <div id="bake-progress-bar" class="h-full bg-gradient-to-r from-[#FF8FAB] to-[#FF4D6D] transition-all duration-150" style="width: 0%;"></div>
+        </div>
+
+        <button id="bake-tap-btn" type="button" class="mt-4 w-full kawaii-btn bg-gradient-to-b from-[#FF7B9C] to-[#FF4D6D] text-white py-3.5 rounded-2xl font-display font-bold text-base cursor-pointer">
+          🥣 Tap to Stir! (0 / 5)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL 2: KAWAII POLAROID PHOTO MODE                       -->
+  <!-- ========================================================= -->
+  <div id="polaroid-modal" class="hidden fixed inset-0 z-50 bg-[#593636]/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="lace-card w-full max-w-md rounded-[2rem] p-5 relative flex flex-col items-center">
+      <button id="close-polaroid-btn" type="button" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#FFF0F5] border border-[#FBC4D8] font-bold text-[#593636] cursor-pointer">✕</button>
+      <h2 class="font-display text-xl font-bold text-[#593636] mb-3">📸 Kawaii Polaroid Snap!</h2>
+
+      <canvas id="polaroid-canvas" width="420" height="500" class="w-full max-w-[320px] h-auto rounded-2xl shadow-lg border-2 border-[#FBC4D8] bg-white"></canvas>
+
+      <div class="w-full mt-3 flex gap-2">
+        <input
+          id="polaroid-caption-input"
+          type="text"
+          maxlength="34"
+          value="Cozy Day at Kitty Café ♡"
+          class="flex-1 bg-white border-2 border-[#FBC4D8] rounded-xl px-3 py-2 text-xs font-bold text-[#593636] focus:outline-none focus:border-[#FF4D6D]"
+          placeholder="Write a cute caption..."
+        />
+        <button id="polaroid-download-btn" type="button" class="kawaii-btn bg-gradient-to-b from-[#FF7B9C] to-[#FF4D6D] text-white px-4 py-2 rounded-xl font-display font-bold text-xs cursor-pointer">
+          Save PNG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level-Up Celebration Banner -->
+  <div id="levelup-banner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gradient-to-r from-[#FF6B8B] via-[#FF8FAB] to-[#FFD166] text-white border-4 border-white px-6 py-3 rounded-full shadow-2xl font-display font-bold text-base sm:text-lg flex items-center gap-2 animate-bounce">
+    <span>🎉</span> <span id="levelup-text">Friendship Level Up!</span> <span>🎀</span>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // =====================================================
+      // 1. WEB AUDIO API SOUND & MUSIC BOX ENGINE
+      // =====================================================
+      class KawaiiAudio {
+        constructor() {
+          this.ctx = null;
+          this.enabled = true;
+          this.musicPlaying = false;
+          this.musicTimer = null;
+          this.noteIdx = 0;
+          // Gentle music-box lullaby melody (pentatonic cozy notes)
+          this.melody = [
+            523.25, 659.25, 783.99, 659.25, 880.00, 783.99, 659.25, 587.33,
+            523.25, 587.33, 659.25, 783.99, 1046.50, 880.00, 783.99, 659.25
+          ];
+        }
+
+        ensure() {
+          if (!this.enabled) return null;
+          if (!this.ctx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (AC) this.ctx = new AC();
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().catch(() => {});
+          }
+          return this.ctx;
+        }
+
+        tone(freq, dur = 0.2, type = 'sine', vol = 0.075, delay = 0) {
+          const ctx = this.ensure();
+          if (!ctx) return;
+          const t = ctx.currentTime + delay;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, t);
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(vol, t + 0.018);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(t);
+          osc.stop(t + dur + 0.03);
+        }
+
+        purrChime() {
+          this.tone(587.33, 0.16, 'sine', 0.07, 0);
+          this.tone(783.99, 0.2, 'triangle', 0.06, 0.07);
+          this.tone(1046.5, 0.24, 'sine', 0.055, 0.14);
+        }
+
+        pop() {
+          this.tone(520, 0.09, 'sine', 0.065, 0);
+          this.tone(740, 0.11, 'triangle', 0.05, 0.04);
+        }
+
+        water() {
+          this.tone(480, 0.12, 'sine', 0.07, 0);
+          this.tone(640, 0.14, 'sine', 0.07, 0.08);
+          this.tone(860, 0.2, 'sine', 0.06, 0.16);
+        }
+
+        fanfare() {
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+            this.tone(f, 0.24, 'triangle', 0.075, i * 0.075);
+          });
+        }
+
+        lullabyNap() {
+          this.tone(523.25, 0.35, 'sine', 0.05, 0);
+          this.tone(440.0, 0.38, 'sine', 0.05, 0.22);
+          this.tone(392.0, 0.45, 'sine', 0.05, 0.44);
+        }
+
+        shutter() {
+          this.tone(920, 0.06, 'square', 0.04, 0);
+          this.tone(660, 0.08, 'triangle', 0.05, 0.05);
+        }
+
+        toggleMusicBox(onTick) {
+          if (this.musicPlaying) {
+            this.stopMusicBox();
+            return false;
+          }
+          if (!this.enabled) return false;
+          this.ensure();
+          this.musicPlaying = true;
+          this.musicTimer = setInterval(() => {
+            if (!this.enabled || !this.musicPlaying) {
+              this.stopMusicBox();
+              return;
+            }
+            const note = this.melody[this.noteIdx % this.melody.length];
+            this.tone(note, 0.45, 'sine', 0.045, 0);
+            this.tone(note * 2, 0.22, 'triangle', 0.015, 0.01);
+            this.noteIdx++;
+            if (onTick && this.noteIdx % 2 === 0) onTick();
+          }, 520);
+          return true;
+        }
+
+        stopMusicBox() {
+          this.musicPlaying = false;
+          if (this.musicTimer) {
+            clearInterval(this.musicTimer);
+            this.musicTimer = null;
+          }
+        }
+      }
+
+      const audio = new KawaiiAudio();
+
+      // =====================================================
+      // 2. GAME CATALOGS
+      // =====================================================
+      const TREATS = [
+        { id: 'shortcake', name: 'Strawberry Shortcake', short: 'Shortcake', emoji: '🍰', tummy: 24, happy: 14, coins: 18 },
+        { id: 'latte', name: 'Kitty Latte', short: 'Kitty Latte', emoji: '☕', tummy: 16, happy: 16, coins: 16 },
+        { id: 'macarons', name: 'Pink Macarons', short: 'Macarons', emoji: '🧁', tummy: 18, happy: 18, coins: 20 },
+        { id: 'applepie', name: 'Warm Apple Pie', short: 'Apple Pie', emoji: '🥧', tummy: 26, happy: 15, coins: 22 },
+        { id: 'donut', name: 'Matcha Donut', short: 'Matcha Donut', emoji: '🍩', tummy: 20, happy: 16, coins: 19 }
+      ];
+
+      const CUSTOMERS = [
+        {
+          id: 'bunny', name: 'Mochi Bunny',
+          svg: `<svg class="w-20 h-24 sm:w-24 sm:h-28 drop-shadow-md" viewBox="0 0 100 115">
+            <ellipse cx="36" cy="24" rx="9" ry="22" transform="rotate(-10 36 24)" fill="#FFF9F4" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="36" cy="25" rx="4.5" ry="14" transform="rotate(-10 36 25)" fill="#FFD6E8"/>
+            <ellipse cx="64" cy="24" rx="9" ry="22" transform="rotate(10 64 24)" fill="#FFF9F4" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="64" cy="25" rx="4.5" ry="14" transform="rotate(10 64 25)" fill="#FFD6E8"/>
+            <path d="M28 84 Q50 76 72 84 L76 108 Q50 113 24 108 Z" fill="#FFD6E8" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="50" cy="60" rx="28" ry="24" fill="#FFF9F4" stroke="#593636" stroke-width="2.4"/>
+            <circle cx="38" cy="60" r="3" fill="#593636"/><circle cx="62" cy="60" r="3" fill="#593636"/>
+            <ellipse cx="32" cy="65" rx="5" ry="3" fill="#FF9EBB" opacity="0.7"/>
+            <ellipse cx="68" cy="65" rx="5" ry="3" fill="#FF9EBB" opacity="0.7"/>
+            <path d="M47 64 Q50 67 53 64" stroke="#593636" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>`
+        },
+        {
+          id: 'bear', name: 'Honey Bear',
+          svg: `<svg class="w-20 h-24 sm:w-24 sm:h-28 drop-shadow-md" viewBox="0 0 100 115">
+            <circle cx="28" cy="38" r="11" fill="#E6B89C" stroke="#593636" stroke-width="2.4"/>
+            <circle cx="28" cy="38" r="5" fill="#F7D6C1"/>
+            <circle cx="72" cy="38" r="11" fill="#E6B89C" stroke="#593636" stroke-width="2.4"/>
+            <circle cx="72" cy="38" r="5" fill="#F7D6C1"/>
+            <path d="M27 84 Q50 76 73 84 L77 108 Q50 113 23 108 Z" fill="#FFE8A3" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="50" cy="60" rx="29" ry="25" fill="#E6B89C" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="50" cy="66" rx="11" ry="8" fill="#FFF3E6"/>
+            <circle cx="38" cy="57" r="3" fill="#593636"/><circle cx="62" cy="57" r="3" fill="#593636"/>
+            <ellipse cx="50" cy="63" rx="3.5" ry="2.5" fill="#593636"/>
+            <ellipse cx="31" cy="64" rx="4.5" ry="2.8" fill="#FF9EBB" opacity="0.65"/>
+            <ellipse cx="69" cy="64" rx="4.5" ry="2.8" fill="#FF9EBB" opacity="0.65"/>
+          </svg>`
+        },
+        {
+          id: 'puppy', name: 'Cream Puppy',
+          svg: `<svg class="w-20 h-24 sm:w-24 sm:h-28 drop-shadow-md" viewBox="0 0 100 115">
+            <ellipse cx="21" cy="60" rx="9" ry="18" transform="rotate(14 21 60)" fill="#FFF3DC" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="79" cy="60" rx="9" ry="18" transform="rotate(-14 79 60)" fill="#FFF3DC" stroke="#593636" stroke-width="2.4"/>
+            <path d="M28 84 Q50 76 72 84 L76 108 Q50 113 24 108 Z" fill="#BAE6FD" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="50" cy="58" rx="28" ry="24" fill="#FFFDF7" stroke="#593636" stroke-width="2.4"/>
+            <circle cx="39" cy="57" r="3" fill="#593636"/><circle cx="61" cy="57" r="3" fill="#593636"/>
+            <ellipse cx="50" cy="62" rx="3.2" ry="2.2" fill="#593636"/>
+            <ellipse cx="32" cy="63" rx="4.8" ry="2.8" fill="#FF9EBB" opacity="0.7"/>
+            <ellipse cx="68" cy="63" rx="4.8" ry="2.8" fill="#FF9EBB" opacity="0.7"/>
+          </svg>`
+        },
+        {
+          id: 'frog', name: 'Matcha Frog',
+          svg: `<svg class="w-20 h-24 sm:w-24 sm:h-28 drop-shadow-md" viewBox="0 0 100 115">
+            <circle cx="35" cy="39" r="10" fill="#B7E4C7" stroke="#593636" stroke-width="2.4"/>
+            <circle cx="65" cy="39" r="10" fill="#B7E4C7" stroke="#593636" stroke-width="2.4"/>
+            <circle cx="35" cy="39" r="3.5" fill="#593636"/><circle cx="65" cy="39" r="3.5" fill="#593636"/>
+            <path d="M28 84 Q50 76 72 84 L76 108 Q50 113 24 108 Z" fill="#FF8FAB" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="50" cy="62" rx="29" ry="22" fill="#B7E4C7" stroke="#593636" stroke-width="2.4"/>
+            <ellipse cx="32" cy="64" rx="5.5" ry="3" fill="#FF9EBB" opacity="0.7"/>
+            <ellipse cx="68" cy="64" rx="5.5" ry="3" fill="#FF9EBB" opacity="0.7"/>
+            <path d="M43 65 Q50 71 57 65" stroke="#593636" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+          </svg>`
+        }
+      ];
+
+      const BOWS = [
+        { id: 'cherry', name: 'Classic Cherry', emoji: '🎀', cost: 0 },
+        { id: 'strawberry', name: 'Strawberry Pink', emoji: '🍓', cost: 0 },
+        { id: 'lavender', name: 'Lavender Polka', emoji: '💜', cost: 25 },
+        { id: 'tiara', name: 'Golden Tiara', emoji: '👑', cost: 45 },
+        { id: 'daisy', name: 'Sunny Daisy', emoji: '🌼', cost: 30 }
+      ];
+
+      const OUTFITS = [
+        { id: 'overalls', name: 'Blue Overalls', emoji: '👖', cost: 0 },
+        { id: 'apron', name: 'Pink Café Apron', emoji: '🍰', cost: 0 },
+        { id: 'lace', name: 'Strawberry Lace', emoji: '🍓', cost: 35 },
+        { id: 'pajamas', name: 'Star Pajamas', emoji: '🌙', cost: 30 },
+        { id: 'sailor', name: 'Mint Sailor', emoji: '⚓', cost: 40 }
+      ];
+
+      const ACCESSORIES = [
+        { id: 'none', name: 'None', emoji: '✨', cost: 0 },
+        { id: 'glasses', name: 'Heart Glasses', emoji: '🩷', cost: 25 },
+        { id: 'bakerhat', name: 'Baker Hat', emoji: '👩‍🍳', cost: 30 },
+        { id: 'teacup', name: 'Mini Teacup', emoji: '🍵', cost: 20 }
+      ];
+
+      const ROOM_THEMES = [
+        { id: 'strawberry', name: 'Strawberry Milk', emoji: '🍓', css: 'theme-strawberry', cost: 0 },
+        { id: 'matcha', name: 'Matcha Mint', emoji: '🍵', css: 'theme-matcha', cost: 30 },
+        { id: 'lavender', name: 'Lavender Dream', emoji: '🪻', css: 'theme-lavender', cost: 35 },
+        { id: 'sakura', name: 'Sakura Tea House', emoji: '🌸', css: 'theme-sakura', cost: 40 }
+      ];
+
+      // =====================================================
+      // 3. STATE & PERSISTENCE
+      // =====================================================
+      const DEFAULT_STATE = {
+        coins: 45,
+        happy: 85,
+        tummy: 75,
+        energy: 80,
+        xp: 20,
+        level: 1,
+        theme: 'strawberry',
+        sky: 'morning',
+        napping: false,
+        plantStage: 0, // 0 sprout, 1 blooms, 2 ripe berries
+        bow: 'cherry',
+        outfit: 'apron',
+        accessory: 'none',
+        unlockedBows: ['cherry', 'strawberry'],
+        unlockedOutfits: ['overalls', 'apron'],
+        unlockedAccessories: ['none'],
+        unlockedThemes: ['strawberry'],
+        stock: { shortcake: 2, latte: 2, macarons: 2, applepie: 2, donut: 2 },
+        currentCustomerIdx: 0,
+        currentOrderId: 'shortcake',
+        soundEnabled: true,
+        stats: { orders: 0, baked: 0, pats: 0, berries: 0 }
+      };
+
+      let state = loadState();
+      let selectedTreatId = null;
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem('hk_cozy_cafe_v2');
+          if (!raw) return structuredClone(DEFAULT_STATE);
+          const parsed = JSON.parse(raw);
+          return {
+            ...structuredClone(DEFAULT_STATE),
+            ...parsed,
+            stock: { ...DEFAULT_STATE.stock, ...(parsed.stock || {}) },
+            stats: { ...DEFAULT_STATE.stats, ...(parsed.stats || {}) }
+          };
+        } catch {
+          return structuredClone(DEFAULT_STATE);
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem('hk_cozy_cafe_v2', JSON.stringify(state));
+        } catch {}
+      }
+
+      const clamp = (v, min = 0, max = 100) => Math.max(min, Math.min(max, Math.round(v)));
+
+      // =====================================================
+      // 4. SVG GENERATORS FOR KITTY BOWS, OUTFITS & ACCESSORIES
+      // =====================================================
+      function getBowSVG(bowId) {
+        if (bowId === 'tiara') {
+          return `
+            <g transform="translate(80, 29)">
+              <path d="M-24 10 L-18 -8 L-7 2 L0 -13 L7 2 L18 -8 L24 10 Z" fill="#FFE066" stroke="#593636" stroke-width="2.4" stroke-linejoin="round"/>
+              <circle cx="0" cy="-14" r="3.5" fill="#FF4D6D" stroke="#593636" stroke-width="1.6"/>
+              <circle cx="-18" cy="-9" r="2.6" fill="#FFD6E8" stroke="#593636" stroke-width="1.4"/>
+              <circle cx="18" cy="-9" r="2.6" fill="#FFD6E8" stroke="#593636" stroke-width="1.4"/>
+            </g>`;
+        }
+        if (bowId === 'daisy') {
+          return `
+            <g transform="translate(110, 42) rotate(16)">
+              <circle cx="0" cy="-12" r="8" fill="#FFFFFF" stroke="#593636" stroke-width="2"/>
+              <circle cx="11" cy="-4" r="8" fill="#FFFFFF" stroke="#593636" stroke-width="2"/>
+              <circle cx="7" cy="9" r="8" fill="#FFFFFF" stroke="#593636" stroke-width="2"/>
+              <circle cx="-7" cy="9" r="8" fill="#FFFFFF" stroke="#593636" stroke-width="2"/>
+              <circle cx="-11" cy="-4" r="8" fill="#FFFFFF" stroke="#593636" stroke-width="2"/>
+              <circle cx="0" cy="0" r="7.5" fill="#FFD166" stroke="#593636" stroke-width="2"/>
+            </g>`;
+        }
+        const palette = {
+          cherry: { main: '#FF3B66', center: '#FF5C82', dot: null },
+          strawberry: { main: '#FF8FAB', center: '#FFB3C6', dot: '#FFF9F4' },
+          lavender: { main: '#B79CED', center: '#D4BBFC', dot: '#FFF9F4' }
+        }[bowId] || { main: '#FF3B66', center: '#FF5C82', dot: null };
+
+        const dots = palette.dot ? `
+          <circle cx="-15" cy="-3" r="2.3" fill="${palette.dot}"/>
+          <circle cx="-13" cy="6" r="2" fill="${palette.dot}"/>
+          <circle cx="15" cy="-3" r="2.3" fill="${palette.dot}"/>
+          <circle cx="13" cy="6" r="2" fill="${palette.dot}"/>` : '';
+
+        return `
+          <g transform="translate(112, 41) rotate(18)">
+            <path d="M-4 0 L-24 -13 C-30 -16 -34 -8 -30 -1 L-24 3 L-30 9 C-34 15 -28 19 -22 15 L-4 5 Z" fill="${palette.main}" stroke="#593636" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M4 0 L24 -13 C30 -16 34 -8 30 -1 L24 3 L30 9 C34 15 28 19 22 15 L4 5 Z" fill="${palette.main}" stroke="#593636" stroke-width="2.5" stroke-linejoin="round"/>
+            <ellipse cx="-16" cy="-5" rx="5.5" ry="2.6" transform="rotate(-14 -16 -5)" fill="#FFFFFF" opacity="0.38"/>
+            <ellipse cx="16" cy="-5" rx="5.5" ry="2.6" transform="rotate(14 16 -5)" fill="#FFFFFF" opacity="0.38"/>
+            ${dots}
+            <rect x="-7.5" y="-7.5" width="15" height="15" rx="6" fill="${palette.center}" stroke="#593636" stroke-width="2.5"/>
+          </g>`;
+      }
+
+      function getOutfitSVG(outfitId) {
+        if (outfitId === 'overalls') {
+          return `
+            <path d="M50 112 Q80 106 110 112 L117 153 Q80 159 43 153 Z" fill="#FFE8A3" stroke="#593636" stroke-width="2.6"/>
+            <path d="M56 122 L104 122 L112 153 Q80 159 48 153 Z" fill="#60A5FA" stroke="#593636" stroke-width="2.4"/>
+            <rect x="59" y="111" width="7" height="14" fill="#60A5FA" stroke="#593636" stroke-width="2"/>
+            <rect x="94" y="111" width="7" height="14" fill="#60A5FA" stroke="#593636" stroke-width="2"/>
+            <circle cx="62.5" cy="126" r="2.6" fill="#FFE066" stroke="#593636" stroke-width="1.3"/>
+            <circle cx="97.5" cy="126" r="2.6" fill="#FFE066" stroke="#593636" stroke-width="1.3"/>`;
+        }
+        if (outfitId === 'lace') {
+          return `
+            <path d="M48 112 Q80 105 112 112 L123 154 Q80 162 37 154 Z" fill="#FF8FAB" stroke="#593636" stroke-width="2.6"/>
+            <path d="M39 152 Q50 160 60 153 Q70 161 80 153 Q90 161 100 153 Q110 160 121 152" fill="none" stroke="#FFF9F4" stroke-width="4" stroke-linecap="round"/>
+            <circle cx="80" cy="134" r="6" fill="#FF4D6D" stroke="#593636" stroke-width="1.8"/>
+            <path d="M77 128 L80 124 L83 128" fill="#52B788" stroke="#593636" stroke-width="1.4"/>`;
+        }
+        if (outfitId === 'pajamas') {
+          return `
+            <path d="M48 112 Q80 106 112 112 L118 154 Q80 160 42 154 Z" fill="#DDD6FE" stroke="#593636" stroke-width="2.6"/>
+            <text x="58" y="136" font-size="11">⭐</text>
+            <text x="86" y="146" font-size="11">🌙</text>
+            <text x="84" y="128" font-size="9">✨</text>`;
+        }
+        if (outfitId === 'sailor') {
+          return `
+            <path d="M48 112 Q80 106 112 112 L119 154 Q80 160 41 154 Z" fill="#B7E4C7" stroke="#593636" stroke-width="2.6"/>
+            <path d="M52 112 L80 130 L108 112" fill="#FFF9F4" stroke="#593636" stroke-width="2.2"/>
+            <path d="M74 128 L86 128 L80 139 Z" fill="#FF4D6D" stroke="#593636" stroke-width="1.8"/>`;
+        }
+        // Default: Pink Café Apron
+        return `
+          <path d="M48 112 Q80 106 112 112 L120 154 Q80 160 40 154 Z" fill="#FFD6E8" stroke="#593636" stroke-width="2.6"/>
+          <path d="M58 113 L102 113 L107 152 Q80 157 53 152 Z" fill="#FFF9F4" stroke="#593636" stroke-width="2.2"/>
+          <path d="M68 131 Q80 136 92 131 L90 144 Q80 148 70 144 Z" fill="#FFE3EE" stroke="#F6A8C2" stroke-width="1.8"/>`;
+      }
+
+      function getAccessorySVG(accId) {
+        if (accId === 'glasses') {
+          return `
+            <g transform="translate(0, 0)">
+              <path d="M55 86 C55 86 43 80 43 73 C43 69 46.5 67 50 67 C52.5 67 54 68.5 55 70.5 C56 68.5 57.5 67 60 67 C63.5 67 67 69 67 73 C67 80 55 86 55 86 Z" fill="rgba(255,143,171,0.35)" stroke="#FF4D6D" stroke-width="2.5"/>
+              <path d="M105 86 C105 86 93 80 93 73 C93 69 96.5 67 100 67 C102.5 67 104 68.5 105 70.5 C106 68.5 107.5 67 110 67 C113.5 67 117 69 117 73 C117 80 105 86 105 86 Z" fill="rgba(255,143,171,0.35)" stroke="#FF4D6D" stroke-width="2.5"/>
+              <line x1="67" y1="74" x2="93" y2="74" stroke="#FF4D6D" stroke-width="2.4"/>
+            </g>`;
+        }
+        if (accId === 'bakerhat') {
+          return `
+            <g transform="translate(68, 22) rotate(-10)">
+              <circle cx="-12" cy="-5" r="11" fill="#FFFFFF" stroke="#593636" stroke-width="2.2"/>
+              <circle cx="0" cy="-11" r="12" fill="#FFFFFF" stroke="#593636" stroke-width="2.2"/>
+              <circle cx="12" cy="-5" r="11" fill="#FFFFFF" stroke="#593636" stroke-width="2.2"/>
+              <rect x="-15" y="-2" width="30" height="12" rx="4" fill="#FFFFFF" stroke="#593636" stroke-width="2.2"/>
+              <line x1="-14" y1="4" x2="14" y2="4" stroke="#FF8FAB" stroke-width="2.2"/>
+            </g>`;
+        }
+        if (accId === 'teacup') {
+          return `
+            <g transform="translate(115, 118)">
+              <path d="M-8 0 L10 0 L8 13 Q1 17 -6 13 Z" fill="#FFF9F4" stroke="#593636" stroke-width="2"/>
+              <path d="M10 3 C15 3 15 10 9 10" fill="none" stroke="#593636" stroke-width="2"/>
+              <ellipse cx="1" cy="0" rx="9" ry="2.8" fill="#B7E4C7" stroke="#593636" stroke-width="1.6"/>
+            </g>`;
+        }
+        return '';
+      }
+
+      // =====================================================
+      // 5. VISUAL FX, TOAST & FRIENDSHIP LEVEL-UP
+      // =====================================================
+      function setToast(msg) {
+        document.getElementById('stage-toast').textContent = msg;
+      }
+
+      function spawnParticles(emojis, xRatio = 0.65, yRatio = 0.6, count = 6) {
+        const layer = document.getElementById('particles-layer');
+        const rect = layer.getBoundingClientRect();
+        const bx = rect.width * xRatio;
+        const by = rect.height * yRatio;
+        for (let i = 0; i < count; i++) {
+          const el = document.createElement('span');
+          el.className = 'particle';
+          el.textContent = emojis[i % emojis.length];
+          el.style.left = `${bx + (Math.random() - 0.5) * 65}px`;
+          el.style.top = `${by + (Math.random() - 0.5) * 32}px`;
+          el.style.setProperty('--dx', `${(Math.random() - 0.5) * 85}px`);
+          el.style.setProperty('--rot', `${(Math.random() - 0.5) * 50}deg`);
+          el.style.animationDelay = `${i * 0.05}s`;
+          layer.appendChild(el);
+          setTimeout(() => el.remove(), 1250);
+        }
+      }
+
+      function addXP(amount) {
+        state.xp += amount;
+        const needed = state.level * 50;
+        if (state.xp >= needed) {
+          state.xp -= needed;
+          state.level += 1;
+          state.coins += 20;
+          audio.fanfare();
+          spawnParticles(['🎉', '🎀', '✨', '💖', '⭐'], 0.5, 0.45, 12);
+          const banner = document.getElementById('levelup-banner');
+          document.getElementById('levelup-text').textContent = `Friendship Level ${state.level}! (+20 🪙)`;
+          banner.classList.remove('hidden');
+          setTimeout(() => banner.classList.add('hidden'), 3200);
+        }
+      }
+
+      let happyEyesTimeout = null;
+      function showKittyReaction(type = 'happy') {
+        const actor = document.getElementById('kitty-actor');
+        const head = document.getElementById('kitty-head-group');
+        const eNorm = document.getElementById('eyes-normal');
+        const eHappy = document.getElementById('eyes-happy');
+        const eSleep = document.getElementById('eyes-sleep');
+        const mouth = document.getElementById('kitty-eat-mouth');
+
+        if (state.napping) return;
+
+        actor.classList.remove('anim-hop');
+        void actor.offsetWidth;
+        actor.classList.add('anim-hop');
+
+        head.classList.remove('anim-ear-wiggle');
+        void head.offsetWidth;
+        head.classList.add('anim-ear-wiggle');
+
+        eNorm.classList.add('hidden');
+        eSleep.classList.add('hidden');
+        eHappy.classList.remove('hidden');
+        if (type === 'eat') mouth.classList.remove('hidden');
+
+        clearTimeout(happyEyesTimeout);
+        happyEyesTimeout = setTimeout(() => {
+          if (!state.napping) {
+            eHappy.classList.add('hidden');
+            mouth.classList.add('hidden');
+            eNorm.classList.remove('hidden');
+          }
+        }, 950);
+      }
+
+      // Periodic natural eye blink
+      setInterval(() => {
+        if (state.napping) return;
+        const eNorm = document.getElementById('eyes-normal');
+        const eSleep = document.getElementById('eyes-sleep');
+        if (!eNorm.classList.contains('hidden')) {
+          eNorm.classList.add('hidden');
+          eSleep.classList.remove('hidden');
+          setTimeout(() => {
+            if (!state.napping && document.getElementById('eyes-happy').classList.contains('hidden')) {
+              eSleep.classList.add('hidden');
+              eNorm.classList.remove('hidden');
+            }
+          }, 160);
+        }
+      }, 4200);
+
+      // =====================================================
+      // 6. CORE INTERACTIONS: PET/RUB, SERVE, PLANT, NAP
+      // =====================================================
+      let lastPetTime = 0;
+      function giveHeadpat() {
+        const now = Date.now();
+        if (now - lastPetTime < 280) return;
+        lastPetTime = now;
+
+        if (state.napping) {
+          toggleNap();
+        }
+        audio.purrChime();
+        state.happy = clamp(state.happy + 6);
+        state.coins += 2;
+        state.stats.pats += 1;
+        addXP(6);
+        showKittyReaction('happy');
+        spawnParticles(['💖', '✨', '🎀', '💕'], 0.72, 0.56, 6);
+        setToast('Purr~ Kitty loves your cozy headpats! (+2 🪙, +6 XP)');
+        saveState();
+        renderHUD();
+      }
+
+      // Direct click & rub/drag headpats on Kitty!
+      const kittyActor = document.getElementById('kitty-actor');
+      let isRubbing = false;
+      let rubAccum = 0;
+
+      kittyActor.addEventListener('pointerdown', (e) => {
+        isRubbing = true;
+        rubAccum = 0;
+        giveHeadpat();
+      });
+      kittyActor.addEventListener('pointermove', (e) => {
+        if (!isRubbing && e.pointerType === 'mouse' && e.buttons === 0) return;
+        rubAccum += Math.hypot(e.movementX || 0, e.movementY || 0);
+        if (rubAccum > 38) {
+          rubAccum = 0;
+          giveHeadpat();
+        }
+      });
+      window.addEventListener('pointerup', () => { isRubbing = false; });
+
+      function feedKitty(treatId) {
+        const treat = TREATS.find(t => t.id === treatId);
+        if (!treat) return;
+        if ((state.stock[treatId] || 0) <= 0) {
+          audio.pop();
+          setToast(`Out of ${treat.name}! Click "Bake Fresh!" to make more.`);
+          return;
+        }
+        if (state.napping) toggleNap();
+
+        state.stock[treatId] -= 1;
+        state.tummy = clamp(state.tummy + treat.tummy);
+        state.happy = clamp(state.happy + treat.happy);
+        state.energy = clamp(state.energy + 6);
+        addXP(10);
+        audio.purrChime();
+        showKittyReaction('eat');
+        spawnParticles([treat.emoji, '💖', '✨', '🍓'], 0.72, 0.6, 7);
+        setToast(`Kitty happily munched ${treat.name}! (+${treat.tummy}% Tummy)`);
+        selectedTreatId = null;
+        saveState();
+        renderAll();
+      }
+
+      function serveCustomer(treatId) {
+        const treat = TREATS.find(t => t.id === treatId);
+        if (!treat) return;
+        if ((state.stock[treatId] || 0) <= 0) {
+          audio.pop();
+          setToast(`Out of ${treat.name}! Bake some fresh treats first.`);
+          return;
+        }
+
+        const customer = CUSTOMERS[state.currentCustomerIdx % CUSTOMERS.length];
+        if (treatId !== state.currentOrderId) {
+          const wanted = TREATS.find(t => t.id === state.currentOrderId);
+          audio.pop();
+          setToast(`${customer.name} asked for ${wanted.emoji} ${wanted.short}! Try dragging that one.`);
+          return;
+        }
+
+        state.stock[treatId] -= 1;
+        state.coins += treat.coins;
+        state.happy = clamp(state.happy + 8);
+        state.stats.orders += 1;
+        addXP(16);
+        audio.fanfare();
+        spawnParticles(['🎉', '🪙', treat.emoji, '💖', '✨'], 0.25, 0.56, 10);
+        setToast(`${customer.name} loved the ${treat.name}! Earned +${treat.coins} 🪙!`);
+
+        // Bring in next adorable café friend
+        state.currentCustomerIdx = (state.currentCustomerIdx + 1) % CUSTOMERS.length;
+        state.currentOrderId = TREATS[Math.floor(Math.random() * TREATS.length)].id;
+        selectedTreatId = null;
+        saveState();
+        renderAll();
+      }
+
+      function interactPlant() {
+        const drops = document.getElementById('plant-droplets');
+        if (state.plantStage < 2) {
+          state.plantStage += 1;
+          audio.water();
+          drops.classList.remove('hidden');
+          setTimeout(() => drops.classList.add('hidden'), 650);
+          spawnParticles(['💧', '🌱', '✨'], 0.16, 0.34, 5);
+          setToast(state.plantStage === 1 ? 'The strawberry plant bloomed tiny flowers! 🌸' : 'Ripe juicy strawberries appeared! Tap to harvest! 🍓');
+        } else {
+          state.plantStage = 0;
+          state.coins += 15;
+          state.happy = clamp(state.happy + 8);
+          state.stats.berries += 3;
+          addXP(12);
+          audio.fanfare();
+          spawnParticles(['🍓', '🪙', '✨', '💖'], 0.16, 0.34, 8);
+          setToast('Harvested sweet windowsill strawberries! Earned +15 🪙!');
+        }
+        saveState();
+        renderAll();
+      }
+
+      function cycleSky(targetSky) {
+        const order = ['morning', 'sunset', 'night'];
+        state.sky = targetSky || order[(order.indexOf(state.sky) + 1) % order.length];
+        audio.pop();
+        const names = { morning: 'Sunny Morning ☀️', sunset: 'Pastel Sunset 🌇', night: 'Starry Night 🌙' };
+        setToast(`Window sky shifted to ${names[state.sky]}!`);
+        saveState();
+        renderScene();
+      }
+
+      function toggleNap() {
+        state.napping = !state.napping;
+        if (state.napping) {
+          audio.lullabyNap();
+          setToast('Shhh... Kitty is taking a cozy nap to restore Energy 🌙');
+        } else {
+          audio.purrChime();
+          setToast('Kitty woke up refreshed and sparkly! ✨');
+        }
+        saveState();
+        renderScene();
+      }
+
+      // Passive nap energy recovery + gentle drift
+      setInterval(() => {
+        if (state.napping) {
+          state.energy = clamp(state.energy + 4);
+          if (state.energy >= 100) {
+            state.napping = false;
+            audio.purrChime();
+            setToast('Kitty is fully rested at 100% Energy! 🎀');
+            renderScene();
+          }
+          renderHUD();
+          saveState();
+        }
+      }, 2200);
+
+      setInterval(() => {
+        if (!state.napping) {
+          state.tummy = clamp(state.tummy - 1, 15, 100);
+          state.energy = clamp(state.energy - 1, 15, 100);
+          state.happy = clamp(state.happy - 1, 20, 100);
+          renderHUD();
+          saveState();
+        }
+      }, 20000);
+
+      // =====================================================
+      // 7. POINTER DRAG-AND-DROP FOR TREATS (DESKTOP + MOBILE)
+      // =====================================================
+      let draggingTreatId = null;
+      let dragStartPos = null;
+      let didDragMove = false;
+      const dragGhost = document.getElementById('drag-ghost');
+      const customerZone = document.getElementById('customer-dropzone');
+      const kittyZone = document.getElementById('kitty-dropzone');
+
+      function hitTest(el, x, y) {
+        const r = el.getBoundingClientRect();
+        return x >= r.left - 18 && x <= r.right + 18 && y >= r.top - 18 && y <= r.bottom + 18;
+      }
+
+      window.addEventListener('pointermove', (e) => {
+        if (!draggingTreatId) return;
+        if (!didDragMove && Math.hypot(e.clientX - dragStartPos.x, e.clientY - dragStartPos.y) > 8) {
+          didDragMove = true;
+          const treat = TREATS.find(t => t.id === draggingTreatId);
+          dragGhost.textContent = treat ? treat.emoji : '🍰';
+          dragGhost.classList.remove('hidden');
+        }
+        if (didDragMove) {
+          dragGhost.style.left = `${e.clientX}px`;
+          dragGhost.style.top = `${e.clientY}px`;
+          customerZone.classList.toggle('drop-target-glow', hitTest(customerZone, e.clientX, e.clientY));
+          kittyZone.classList.toggle('drop-target-glow', hitTest(kittyZone, e.clientX, e.clientY));
+        }
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        if (!draggingTreatId) return;
+        const treatId = draggingTreatId;
+        draggingTreatId = null;
+        dragGhost.classList.add('hidden');
+        customerZone.classList.remove('drop-target-glow');
+        kittyZone.classList.remove('drop-target-glow');
+
+        if (didDragMove) {
+          if (hitTest(customerZone, e.clientX, e.clientY)) {
+            serveCustomer(treatId);
+          } else if (hitTest(kittyZone, e.clientX, e.clientY)) {
+            feedKitty(treatId);
+          }
+        } else {
+          // Treat as a tap/click to select
+          selectedTreatId = selectedTreatId === treatId ? null : treatId;
+          audio.pop();
+          renderBakeryCounter();
+        }
+      });
+
+      // =====================================================
+      // 8. "BAKE A TREAT" 3-STEP MINI-GAME
+      // =====================================================
+      let bakeTreatId = null;
+      let bakeStep = 1;
+      let bakeTaps = 0;
+      const TAPS_PER_STEP = 5;
+
+      function openBakeModal() {
+        bakeTreatId = null;
+        document.getElementById('bake-choose-view').classList.remove('hidden');
+        document.getElementById('bake-play-view').classList.add('hidden');
+
+        const grid = document.getElementById('bake-treat-choices');
+        grid.innerHTML = '';
+        TREATS.forEach(t => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'kawaii-btn bg-[#FFF4F8] border-2 border-[#FBC4D8] rounded-2xl p-3 flex items-center gap-2 text-left cursor-pointer';
+          btn.innerHTML = `<span class="text-2xl">${t.emoji}</span><div><div class="font-display font-bold text-xs text-[#593636]">${t.short}</div><div class="text-[10px] font-bold text-[#8A5E63]">Stock: ${state.stock[t.id] || 0}</div></div>`;
+          btn.addEventListener('click', () => startBaking(t.id));
+          grid.appendChild(btn);
+        });
+
+        document.getElementById('bake-modal').classList.remove('hidden');
+        audio.pop();
+      }
+
+      function startBaking(treatId) {
+        bakeTreatId = treatId;
+        bakeStep = 1;
+        bakeTaps = 0;
+        document.getElementById('bake-choose-view').classList.add('hidden');
+        document.getElementById('bake-play-view').classList.remove('hidden');
+        updateBakeUI();
+        audio.pop();
+      }
+
+      function updateBakeUI() {
+        const treat = TREATS.find(t => t.id === bakeTreatId);
+        const visual = document.getElementById('bake-visual');
+        const instr = document.getElementById('bake-step-instruction');
+        const tapBtn = document.getElementById('bake-tap-btn');
+        const bar = document.getElementById('bake-progress-bar');
+
+        [1, 2, 3].forEach(n => {
+          const p = document.getElementById(`step-pill-${n}`);
+          p.className = n <= bakeStep
+            ? 'px-2.5 py-1 rounded-full bg-[#FF4D6D] text-white'
+            : 'px-2.5 py-1 rounded-full bg-pink-100 text-[#8A5E63]';
+        });
+
+        if (bakeStep === 1) {
+          visual.textContent = '🥣';
+          instr.textContent = 'Step 1: Whisk the sweet batter!';
+          tapBtn.textContent = `🥣 Mix Batter (${bakeTaps}/${TAPS_PER_STEP})`;
+        } else if (bakeStep === 2) {
+          visual.textContent = '🧁';
+          instr.textContent = 'Step 2: Swirl fluffy pastel frosting!';
+          tapBtn.textContent = `🍦 Swirl Frosting (${bakeTaps}/${TAPS_PER_STEP})`;
+        } else {
+          visual.textContent = treat ? treat.emoji : '🍰';
+          instr.textContent = 'Step 3: Add strawberries & sparkles!';
+          tapBtn.textContent = `🍓 Add Sparkles (${bakeTaps}/${TAPS_PER_STEP})`;
+        }
+
+        const totalPct = (((bakeStep - 1) * TAPS_PER_STEP + bakeTaps) / (3 * TAPS_PER_STEP)) * 100;
+        bar.style.width = `${totalPct}%`;
+      }
+
+      document.getElementById('bake-tap-btn').addEventListener('click', () => {
+        bakeTaps += 1;
+        audio.pop();
+        const visual = document.getElementById('bake-visual');
+        visual.style.transform = `scale(1.18) rotate(${(bakeTaps % 2 ? 10 : -10)}deg)`;
+        setTimeout(() => { visual.style.transform = ''; }, 120);
+
+        const sp = document.getElementById('bake-sparkle-layer');
+        sp.textContent = bakeStep === 1 ? '🥄 ✨' : bakeStep === 2 ? '🍦 💕' : '🍓 ✨ 🎀';
+        setTimeout(() => { sp.textContent = ''; }, 240);
+
+        if (bakeTaps >= TAPS_PER_STEP) {
+          if (bakeStep < 3) {
+            bakeStep += 1;
+            bakeTaps = 0;
+            audio.purrChime();
+          } else {
+            // Finished baking!
+            const treat = TREATS.find(t => t.id === bakeTreatId);
+            state.stock[bakeTreatId] = (state.stock[bakeTreatId] || 0) + 3;
+            state.coins += 15;
+            state.stats.baked += 3;
+            addXP(15);
+            audio.fanfare();
+            document.getElementById('bake-modal').classList.add('hidden');
+            spawnParticles([treat.emoji, '✨', '🪙', '🎀'], 0.5, 0.55, 10);
+            setToast(`Baked 3 fresh ${treat.name}s! (+15 🪙)`);
+            saveState();
+            renderAll();
+            return;
+          }
+        }
+        updateBakeUI();
+      });
+
+      document.getElementById('open-bake-btn').addEventListener('click', openBakeModal);
+      document.getElementById('tab-open-bake-btn').addEventListener('click', openBakeModal);
+      document.getElementById('close-bake-btn').addEventListener('click', () => {
+        document.getElementById('bake-modal').classList.add('hidden');
+      });
+
+      // =====================================================
+      // 9. KAWAII POLAROID PHOTO MODE (CANVAS RENDER + DOWNLOAD)
+      // =====================================================
+      function renderPolaroid() {
+        const canvas = document.getElementById('polaroid-canvas');
+        const ctx = canvas.getContext('2d');
+        const caption = document.getElementById('polaroid-caption-input').value || 'Cozy Day at Kitty Café ♡';
+
+        // Polaroid white card frame
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, 420, 500);
+
+        // Theme backdrop inside photo window
+        const bgColors = {
+          strawberry: ['#FFF0F6', '#FFD6E8'],
+          matcha: ['#F0FBF4', '#C7EFCF'],
+          lavender: ['#F5F0FF', '#DDD0FA'],
+          sakura: ['#FFF0F3', '#FFCCD8']
+        }[state.theme] || ['#FFF0F6', '#FFD6E8'];
+
+        const grad = ctx.createLinearGradient(24, 24, 24, 396);
+        grad.addColorStop(0, bgColors[0]);
+        grad.addColorStop(1, bgColors[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(24, 24, 372, 372);
+
+        // Sky badge & decorative polka dots
+        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        for (let x = 44; x < 385; x += 36) {
+          for (let y = 44; y < 385; y += 36) {
+            ctx.beginPath();
+            ctx.arc(x, y, 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Scalloped top awning inside polaroid
+        for (let i = 0; i < 10; i++) {
+          ctx.fillStyle = i % 2 === 0 ? '#FF5C82' : '#FFF9F4';
+          ctx.beginPath();
+          ctx.arc(24 + i * 37.2 + 18.6, 24, 18.6, 0, Math.PI);
+          ctx.fill();
+        }
+
+        // Convert live dressed-up Kitty SVG to image and draw centered!
+        const kittySvg = document.getElementById('kitty-svg').cloneNode(true);
+        kittySvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        kittySvg.setAttribute('width', '260');
+        kittySvg.setAttribute('height', '286');
+        const svgStr = new XMLSerializer().serializeToString(kittySvg);
+        const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 80, 92, 260, 286);
+          URL.revokeObjectURL(url);
+
+          // Kawaii corner stickers
+          ctx.font = '32px serif';
+          ctx.fillText('🍓', 40, 88);
+          ctx.fillText('✨', 345, 88);
+          ctx.fillText('🎀', 40, 376);
+          ctx.fillText('🍰', 345, 376);
+
+          // Photo border
+          ctx.strokeStyle = '#FBC4D8';
+          ctx.lineWidth = 4;
+          ctx.strokeRect(24, 24, 372, 372);
+
+          // Polaroid Caption
+          ctx.fillStyle = '#593636';
+          ctx.font = '700 22px Fredoka, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(caption, 210, 448);
+
+          ctx.fillStyle = '#8A5E63';
+          ctx.font = '700 13px Nunito, sans-serif';
+          ctx.fillText(`Lv.${state.level} Bestie  •  Hello Kitty Cozy Café`, 210, 475);
+        };
+        img.src = url;
+      }
+
+      document.getElementById('polaroid-btn').addEventListener('click', () => {
+        audio.shutter();
+        document.getElementById('polaroid-modal').classList.remove('hidden');
+        renderPolaroid();
+      });
+      document.getElementById('polaroid-caption-input').addEventListener('input', renderPolaroid);
+      document.getElementById('close-polaroid-btn').addEventListener('click', () => {
+        document.getElementById('polaroid-modal').classList.add('hidden');
+      });
+      document.getElementById('polaroid-download-btn').addEventListener('click', () => {
+        const canvas = document.getElementById('polaroid-canvas');
+        const link = document.createElement('a');
+        link.download = 'hello-kitty-cozy-cafe-polaroid.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        audio.fanfare();
+      });
+
+      // =====================================================
+      // 10. RENDER FUNCTIONS
+      // =====================================================
+      function renderHUD() {
+        document.getElementById('hud-coins').textContent = state.coins;
+        document.getElementById('hud-level').textContent = state.level;
+        const pct = Math.min(100, Math.round((state.xp / (state.level * 50)) * 100));
+        document.getElementById('hud-xp-bar').style.width = `${pct}%`;
+
+        document.getElementById('hud-happy-val').textContent = `${state.happy}%`;
+        document.getElementById('hud-happy-bar').style.width = `${state.happy}%`;
+        document.getElementById('hud-tummy-val').textContent = `${state.tummy}%`;
+        document.getElementById('hud-tummy-bar').style.width = `${state.tummy}%`;
+        document.getElementById('hud-energy-val').textContent = `${state.energy}%`;
+        document.getElementById('hud-energy-bar').style.width = `${state.energy}%`;
+
+        document.getElementById('sound-icon').textContent = state.soundEnabled ? '🔔' : '🔕';
+        document.getElementById('sound-label').textContent = state.soundEnabled ? 'Sound On' : 'Muted';
+
+        document.getElementById('stat-orders').textContent = state.stats.orders;
+        document.getElementById('stat-baked').textContent = state.stats.baked;
+        document.getElementById('stat-pats').textContent = state.stats.pats;
+        document.getElementById('stat-berries').textContent = state.stats.berries;
+      }
+
+      function renderScene() {
+        // Room theme
+        const stage = document.getElementById('room-stage');
+        ROOM_THEMES.forEach(t => stage.classList.remove(t.css));
+        const activeTheme = ROOM_THEMES.find(t => t.id === state.theme) || ROOM_THEMES[0];
+        stage.classList.add(activeTheme.css);
+
+        // Window sky & dynamic room lighting overlay
+        const winBtn = document.getElementById('window-btn');
+        winBtn.classList.remove('sky-morning', 'sky-sunset', 'sky-night');
+        winBtn.classList.add(`sky-${state.sky}`);
+
+        const sunMoon = document.getElementById('sky-sun-moon');
+        const stars = document.getElementById('sky-stars');
+        const clouds = document.getElementById('sky-clouds');
+        const light = document.getElementById('lighting-overlay');
+
+        if (state.sky === 'morning') {
+          sunMoon.className = 'absolute top-3.5 right-4 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#FFE8A3] shadow-[0_0_14px_rgba(255,232,163,0.95)] transition-all duration-500';
+          stars.classList.add('hidden');
+          clouds.classList.remove('hidden');
+          light.style.background = state.napping ? 'rgba(42, 32, 74, 0.34)' : 'transparent';
+        } else if (state.sky === 'sunset') {
+          sunMoon.className = 'absolute top-8 right-4 w-8 h-8 rounded-full bg-[#FF9E80] shadow-[0_0_16px_rgba(255,158,128,0.95)] transition-all duration-500';
+          stars.classList.add('hidden');
+          clouds.classList.remove('hidden');
+          light.style.background = state.napping ? 'rgba(54, 30, 68, 0.4)' : 'rgba(255, 165, 145, 0.14)';
+        } else {
+          sunMoon.className = 'absolute top-3.5 right-4 w-7 h-7 rounded-full bg-[#FFF7C2] shadow-[0_0_16px_rgba(255,247,194,0.9)] transition-all duration-500';
+          stars.classList.remove('hidden');
+          clouds.classList.add('hidden');
+          light.style.background = state.napping ? 'rgba(22, 18, 52, 0.45)' : 'rgba(34, 28, 72, 0.22)';
+        }
+
+        // Plant stage
+        [0, 1, 2].forEach(s => {
+          document.getElementById(`plant-stage-${s}`).classList.toggle('hidden', state.plantStage !== s);
+        });
+        const pBadges = ['💧 Water Sprout', '🌸 Water Blooms', '🍓 Pick Berries!'];
+        document.getElementById('plant-badge').textContent = pBadges[state.plantStage];
+
+        // Kitty dress-up layers
+        document.getElementById('kitty-bow-layer').innerHTML = getBowSVG(state.bow);
+        document.getElementById('kitty-outfit-layer').innerHTML = getOutfitSVG(state.outfit);
+        document.getElementById('kitty-accessory-layer').innerHTML = getAccessorySVG(state.accessory);
+
+        // Nap visuals
+        const actor = document.getElementById('kitty-actor');
+        const zzz = document.getElementById('kitty-zzz');
+        const eNorm = document.getElementById('eyes-normal');
+        const eHappy = document.getElementById('eyes-happy');
+        const eSleep = document.getElementById('eyes-sleep');
+        if (state.napping) {
+          actor.classList.remove('anim-breathe');
+          actor.classList.add('anim-sleep');
+          zzz.classList.remove('hidden');
+          eNorm.classList.add('hidden');
+          eHappy.classList.add('hidden');
+          eSleep.classList.remove('hidden');
+          document.getElementById('nap-btn-label').textContent = 'Wake Up';
+        } else {
+          actor.classList.remove('anim-sleep');
+          actor.classList.add('anim-breathe');
+          zzz.classList.add('hidden');
+          if (eHappy.classList.contains('hidden')) {
+            eSleep.classList.add('hidden');
+            eNorm.classList.remove('hidden');
+          }
+          document.getElementById('nap-btn-label').textContent = 'Cozy Nap';
+        }
+
+        // Visiting Customer & Order
+        const cust = CUSTOMERS[state.currentCustomerIdx % CUSTOMERS.length];
+        const ord = TREATS.find(t => t.id === state.currentOrderId) || TREATS[0];
+        document.getElementById('customer-avatar').innerHTML = cust.svg;
+        document.getElementById('order-customer-name').textContent = cust.name;
+        document.getElementById('order-treat-emoji').textContent = ord.emoji;
+        document.getElementById('order-treat-name').textContent = `${ord.short}!`;
+        document.getElementById('cafe-guest-desc').textContent =
+          `${cust.name} is craving ${ord.emoji} ${ord.name}! Drag it from the Bakery Counter onto them (or tap to serve).`;
+      }
+
+      function renderBakeryCounter() {
+        const grid = document.getElementById('bakery-counter-grid');
+        grid.innerHTML = '';
+
+        TREATS.forEach(t => {
+          const qty = state.stock[t.id] || 0;
+          const isSelected = selectedTreatId === t.id;
+          const card = document.createElement('div');
+          card.className = `kawaii-btn relative rounded-2xl p-2 flex flex-col items-center justify-center text-center cursor-grab active:cursor-grabbing border-2 transition touch-none ${
+            isSelected
+              ? 'bg-[#FFE3EE] border-[#FF4D6D]'
+              : 'bg-[#FFF7FA] border-[#FBC4D8]'
+          } ${qty <= 0 ? 'opacity-50' : ''}`;
+
+          card.innerHTML = `
+            <span class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full ${qty > 0 ? 'bg-[#FF4D6D]' : 'bg-gray-400'} text-white text-[10px] font-extrabold flex items-center justify-center border border-white shadow-sm">${qty}</span>
+            <span class="text-2xl sm:text-3xl leading-none">${t.emoji}</span>
+            <span class="font-display font-bold text-[10px] text-[#593636] mt-1 leading-tight truncate w-full">${t.short}</span>
+          `;
+
+          card.addEventListener('pointerdown', (e) => {
+            if (qty <= 0) {
+              audio.pop();
+              setToast(`No ${t.short} left! Click "Bake Fresh!" to restock.`);
+              return;
+            }
+            draggingTreatId = t.id;
+            dragStartPos = { x: e.clientX, y: e.clientY };
+            didDragMove = false;
+          });
+
+          grid.appendChild(card);
+        });
+
+        const bar = document.getElementById('selected-treat-bar');
+        if (selectedTreatId && (state.stock[selectedTreatId] || 0) > 0) {
+          const t = TREATS.find(x => x.id === selectedTreatId);
+          document.getElementById('selected-treat-label').textContent = `${t.emoji} ${t.name}`;
+          bar.classList.remove('hidden');
+        } else {
+          bar.classList.add('hidden');
+        }
+      }
+
+      function renderBoutiqueGroup(containerId, items, activeId, unlockedArr, onPick) {
+        const box = document.getElementById(containerId);
+        box.innerHTML = '';
+        items.forEach(item => {
+          const owned = unlockedArr.includes(item.id);
+          const equipped = activeId === item.id;
+          const canBuy = state.coins >= item.cost;
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `kawaii-btn p-2.5 rounded-2xl border-2 text-left flex items-center justify-between gap-1.5 cursor-pointer ${
+            equipped
+              ? 'bg-[#FFE3EE] border-[#FF4D6D]'
+              : 'bg-white border-[#FBC4D8]'
+          }`;
+
+          let tag = '';
+          if (equipped) tag = '<span class="text-[10px] font-extrabold text-[#FF4D6D]">Wearing</span>';
+          else if (owned) tag = '<span class="text-[10px] font-extrabold text-[#10B981]">Wear</span>';
+          else tag = `<span class="text-[10px] font-extrabold ${canBuy ? 'text-[#D97706]' : 'text-[#9CA3AF]'}">${item.cost} 🪙</span>`;
+
+          btn.innerHTML = `
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-lg shrink-0">${item.emoji}</span>
+              <span class="font-display font-bold text-xs text-[#593636] truncate">${item.name}</span>
+            </div>
+            <div class="shrink-0">${tag}</div>
+          `;
+
+          btn.addEventListener('click', () => onPick(item));
+          box.appendChild(btn);
+        });
+      }
+
+      function renderRightPanels() {
+        renderBoutiqueGroup('boutique-bows', BOWS, state.bow, state.unlockedBows, (item) => {
+          if (!state.unlockedBows.includes(item.id)) {
+            if (state.coins < item.cost) { audio.pop(); setToast(`Need ${item.cost} 🪙 for ${item.name}!`); return; }
+            state.coins -= item.cost;
+            state.unlockedBows.push(item.id);
+            audio.fanfare();
+            spawnParticles([item.emoji, '✨', '🎀'], 0.72, 0.5, 7);
+          } else {
+            audio.pop();
+          }
+          state.bow = item.id;
+          saveState();
+          renderAll();
+        });
+
+        renderBoutiqueGroup('boutique-outfits', OUTFITS, state.outfit, state.unlockedOutfits, (item) => {
+          if (!state.unlockedOutfits.includes(item.id)) {
+            if (state.coins < item.cost) { audio.pop(); setToast(`Need ${item.cost} 🪙 for ${item.name}!`); return; }
+            state.coins -= item.cost;
+            state.unlockedOutfits.push(item.id);
+            audio.fanfare();
+            spawnParticles([item.emoji, '✨', '💖'], 0.72, 0.62, 7);
+          } else {
+            audio.pop();
+          }
+          state.outfit = item.id;
+          saveState();
+          renderAll();
+        });
+
+        renderBoutiqueGroup('boutique-accessories', ACCESSORIES, state.accessory, state.unlockedAccessories, (item) => {
+          if (!state.unlockedAccessories.includes(item.id)) {
+            if (state.coins < item.cost) { audio.pop(); setToast(`Need ${item.cost} 🪙 for ${item.name}!`); return; }
+            state.coins -= item.cost;
+            state.unlockedAccessories.push(item.id);
+            audio.fanfare();
+            spawnParticles([item.emoji, '✨'], 0.72, 0.56, 6);
+          } else {
+            audio.pop();
+          }
+          state.accessory = item.id;
+          saveState();
+          renderAll();
+        });
+
+        renderBoutiqueGroup('room-themes-grid', ROOM_THEMES, state.theme, state.unlockedThemes, (item) => {
+          if (!state.unlockedThemes.includes(item.id)) {
+            if (state.coins < item.cost) { audio.pop(); setToast(`Need ${item.cost} 🪙 for ${item.name}!`); return; }
+            state.coins -= item.cost;
+            state.unlockedThemes.push(item.id);
+            audio.fanfare();
+            spawnParticles([item.emoji, '✨', '🏠'], 0.5, 0.45, 9);
+          } else {
+            audio.pop();
+          }
+          state.theme = item.id;
+          saveState();
+          renderAll();
+        });
+      }
+
+      function renderAll() {
+        renderHUD();
+        renderScene();
+        renderBakeryCounter();
+        renderRightPanels();
+      }
+
+      // =====================================================
+      // 11. EVENT WIRING
+      // =====================================================
+      document.getElementById('window-btn').addEventListener('click', () => cycleSky());
+      document.getElementById('plant-btn').addEventListener('click', interactPlant);
+      document.getElementById('nap-btn').addEventListener('click', toggleNap);
+
+      document.getElementById('musicbox-btn').addEventListener('click', () => {
+        const playing = audio.toggleMusicBox(() => {
+          spawnParticles(['🎵', '🎶', '✨'], 0.85, 0.25, 2);
+        });
+        document.getElementById('musicbox-status').textContent = playing ? '🎶 Playing' : '🎵 Music Off';
+        setToast(playing ? 'Cozy music-box lullaby is playing! 🎶' : 'Music box paused.');
+      });
+
+      document.getElementById('customer-order-btn').addEventListener('click', () => {
+        if (selectedTreatId) serveCustomer(selectedTreatId);
+        else serveCustomer(state.currentOrderId);
+      });
+      document.getElementById('customer-avatar').addEventListener('click', () => {
+        if (selectedTreatId) serveCustomer(selectedTreatId);
+        else serveCustomer(state.currentOrderId);
+      });
+
+      document.getElementById('quick-serve-friend-btn').addEventListener('click', () => {
+        if (selectedTreatId) serveCustomer(selectedTreatId);
+      });
+      document.getElementById('quick-feed-kitty-btn').addEventListener('click', () => {
+        if (selectedTreatId) feedKitty(selectedTreatId);
+      });
+
+      document.querySelectorAll('.sky-pill').forEach(btn => {
+        btn.addEventListener('click', () => cycleSky(btn.dataset.sky));
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          audio.pop();
+          const target = btn.dataset.tab;
+          document.querySelectorAll('.tab-btn').forEach(b => {
+            const active = b.dataset.tab === target;
+            b.className = `tab-btn font-display font-semibold text-xs sm:text-sm py-2 rounded-xl transition cursor-pointer ${
+              active ? 'bg-white text-[#FF4D6D] shadow-sm' : 'text-[#8A5E63] hover:text-[#593636]'
+            }`;
+          });
+          document.querySelectorAll('.tab-panel').forEach(p => {
+            p.classList.toggle('hidden', p.id !== `tab-${target}`);
+          });
+        });
+      });
+
+      document.getElementById('sound-btn').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        audio.enabled = state.soundEnabled;
+        if (!state.soundEnabled) {
+          audio.stopMusicBox();
+          document.getElementById('musicbox-status').textContent = '🎵 Music Off';
+        } else {
+          audio.purrChime();
+        }
+        saveState();
+        renderHUD();
+      });
+
+      document.getElementById('reset-btn').addEventListener('click', () => {
+        audio.stopMusicBox();
+        document.getElementById('musicbox-status').textContent = '🎵 Music Off';
+        state = structuredClone(DEFAULT_STATE);
+        audio.enabled = state.soundEnabled;
+        selectedTreatId = null;
+        audio.pop();
+        setToast('Started a fresh cozy day at Hello Kitty Café! 🎀');
+        saveState();
+        renderAll();
+      });
+
+      // Boot!
+      audio.enabled = state.soundEnabled;
+      renderAll();
+    })();
+  </script>
+</body>
+</html>
