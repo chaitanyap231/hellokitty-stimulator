@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 🎀 Hello Kitty Cozy Café & Room Simulator
 
 A cozy, Pinterest-inspired kawaii café and room simulator built in a single self-contained HTML file. Pet and dress up an animated Hello Kitty, serve treats to visiting animal friends, bake fresh pastries in a 3-step mini-game, decorate your room, and snap downloadable Polaroid photos—with zero build tools or external asset dependencies.
@@ -97,3 +98,7 @@ hello-kitty-cozy-cafe/
 This is a fan-made cozy simulator project created for fun and educational purposes. Hello Kitty is a trademark of Sanrio Co., Ltd.
 
 Released under the MIT License. Feel free to fork, customize, and add your own treats, outfits, or room themes!
+=======
+hello zii
+>>>>>>> 281c05e (Add HLD, LLD, and PRD documentation)
+HAHAHAHA
