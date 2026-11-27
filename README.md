@@ -98,4 +98,4 @@ This is a fan-made cozy simulator project created for fun and educational purpos
 
 Released under the MIT License. Feel free to fork, customize, and add your own treats, outfits, or room themes!
 
-HAHAHAHAHAHA
+HAHAHAHA
