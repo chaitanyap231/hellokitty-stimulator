@@ -97,3 +97,5 @@ hello-kitty-cozy-cafe/
 This is a fan-made cozy simulator project created for fun and educational purposes. Hello Kitty is a trademark of Sanrio Co., Ltd.
 
 Released under the MIT License. Feel free to fork, customize, and add your own treats, outfits, or room themes!
+
+HAHAHAHAHAHA
