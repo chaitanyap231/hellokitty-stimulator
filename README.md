@@ -1,3 +1,6 @@
+LIVE DEMO
+https://agent-6b0aa11e0d55973340b--hellokitty-stimulator.netlify.app/
+
 🎀 Hello Kitty Cozy Café & Room Simulator
 
 A cozy, Pinterest-inspired kawaii café and room simulator built in a single self-contained HTML file. Pet and dress up an animated Hello Kitty, serve treats to visiting animal friends, bake fresh pastries in a 3-step mini-game, decorate your room, and snap downloadable Polaroid photos—with zero build tools or external asset dependencies.
